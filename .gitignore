@@ -30,3 +30,6 @@ Temporary Items
 # Node and NPM
 ## Dependency directories
 node_modules/
+
+# Always keep directories containing a `.gitkeep` file
+!/**/.gitkeep
