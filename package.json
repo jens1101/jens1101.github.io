@@ -1,0 +1,24 @@
+{
+  "name": "jens1101.github.io",
+  "version": "1.0.0",
+  "description": "Jens Tschirpig personal website",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently serve \"open-cli http://localhost:5000/\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jens1101/jens1101.github.io.git"
+  },
+  "author": "Jens Tschirpig",
+  "bugs": {
+    "url": "https://github.com/jens1101/jens1101.github.io/issues"
+  },
+  "homepage": "https://jens1101.github.io",
+  "devDependencies": {
+    "concurrently": "^5.0.0",
+    "open-cli": "^5.0.0",
+    "serve": "^11.2.0",
+    "standard": "^14.3.1"
+  }
+}
