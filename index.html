@@ -9,12 +9,13 @@
 
   <link href="site.webmanifest" rel="manifest">
   <link href="icon.png" rel="apple-touch-icon">
-  <!-- Place favicon.ico in the root directory -->
 
   <link href="vendor/bootstrap-4.3.1/css/bootstrap.min.css"
         rel="stylesheet">
+  <link href="vendor/prism-1.17.1/prism.css" rel="stylesheet">
 
   <script async src="js/main.js"></script>
+  <script async src="vendor/prism-1.17.1/prism.js"></script>
 </head>
 
 <body>
@@ -43,7 +44,7 @@
       <div class="col-auto">
         <img alt="Portrait of Jens"
              class="rounded-circle img-fluid mb-4 img-thumbnail"
-             src="http://placeimg.com/300/300/people" />
+             src="http://placeimg.com/300/300/people">
       </div>
       <div class="w-100"></div>
       <div class="col-sm-10 col-md-8 col-lg-10">
@@ -58,7 +59,7 @@
       </div>
     </section>
 
-    <hr />
+    <hr>
 
     <section class="mb-5 py-3">
       <h2>My Projects</h2>
@@ -71,6 +72,18 @@
 
     <section class="mb-5 py-3">
       <h2>My Gists</h2>
+
+      <div class="card" style="width: 18rem;">
+        <div class="card-img-top">
+          <pre class="m-0"><code class="language-css">p { color: red }</code></pre>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Card title</h5>
+          <p class="card-text">Some quick example text to build on the card
+            title and make up the bulk of the card's content.</p>
+          <a class="btn btn-primary" href="#">Go somewhere</a>
+        </div>
+      </div>
       <p>
         &#x2E3B; View all my gists on
         <a href="https://gist.github.com/jens1101">GitHub Gist</a> &#x2E3B;
