@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="">
+<html class="no-js" lang="en">
 
 <head>
   <meta charset="utf-8">
@@ -7,13 +7,23 @@
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no"
         name="viewport">
 
+  <base href="/" target="_blank">
+
   <link href="site.webmanifest" rel="manifest">
   <link href="icon.png" rel="apple-touch-icon">
 
   <link href="vendor/bootstrap-4.3.1/css/bootstrap.min.css"
         rel="stylesheet">
   <link href="vendor/prism-1.17.1/prism.css" rel="stylesheet">
+  <link href="css/main.css" rel="stylesheet">
 
+  <script>
+    // Replace the `no-js` class with the `js` class
+    (function (htmlElement) {
+      htmlElement.classList.remove('no-js')
+      htmlElement.classList.add('js')
+    })(document.documentElement)
+  </script>
   <script async src="js/main.js"></script>
   <script async data-manual src="vendor/prism-1.17.1/prism.js"></script>
 </head>
@@ -26,21 +36,21 @@
 
         <ul class="navbar-nav ml-auto">
           <li class="nav-item active">
-            <a class="nav-link" href="#">Home</a>
+            <a class="nav-link" href="#" target="_self">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">About Me</a>
+            <a class="nav-link" href="#" target="_self">About Me</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Contact</a>
+            <a class="nav-link" href="#" target="_self">Contact</a>
           </li>
         </ul>
       </div>
     </nav>
   </header>
 
-  <main class="container text-center">
-    <section class="row justify-content-center my-5">
+  <main class="container">
+    <section class="row justify-content-center my-5 text-center">
       <div class="col-auto">
         <img alt="Portrait of Jens"
              class="rounded-circle img-fluid mb-4 img-thumbnail"
@@ -62,8 +72,8 @@
     <hr>
 
     <section class="mb-5 py-3">
-      <h2>My Projects</h2>
-      <p>
+      <h2 class="text-center">My Projects</h2>
+      <p class="text-center">
         &#x2E3B; View all my projects on
         <a href="https://github.com/jens1101?tab=repositories">GitHub</a>
         &#x2E3B;
@@ -71,34 +81,48 @@
     </section>
 
     <section class="mb-5 py-3">
-      <h2>My Gists</h2>
+      <h2 class="text-center">My Gists</h2>
 
-      <div id="my-gists">
-        <!-- Gist cards go here -->
+      <p>
+        These are small code snippets I create whenever I finally figured out a
+        solution to a problem, I learned something new, or I find myself
+        repeatedly writing the same script.
+      </p>
+
+      <div class="no-js-d-none">
+        <p class="mb-4">
+          My most recent gists are shown below:
+        </p>
+
+        <div class="row text-left" id="my-gists">
+          <!-- Gist cards go here -->
+        </div>
       </div>
 
       <template id="gist-card-template">
-        <div class="card">
-          <div class="card-img-top">
-            <pre class="m-0"><code>
-                <!-- Gist preview -->
-            </code></pre>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              <!--  Gist name -->
-            </h5>
-            <p class="card-text">
-              <!-- Gist description -->
-            </p>
-            <a class="btn btn-primary" href="#">
-              <!-- Link to view Gist on GitHub -->
-            </a>
+        <div class="col-lg-6 mb-4">
+          <div class="card h-100">
+            <div class="card-img-top">
+              <pre class="m-0 gist-preview"><code>
+                  <!-- Gist preview -->
+              </code></pre>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">
+                <!--  Gist name -->
+              </h3>
+              <p class="card-text">
+                <!-- Gist description -->
+              </p>
+              <a class="btn btn-primary gist-link" href="#">
+                View on GitHub
+              </a>
+            </div>
           </div>
         </div>
       </template>
 
-      <p>
+      <p class="text-center">
         &#x2E3B; View all my gists on
         <a href="https://gist.github.com/jens1101">GitHub Gist</a> &#x2E3B;
       </p>

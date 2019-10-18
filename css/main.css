@@ -1,0 +1,11 @@
+.gist-preview {
+  /* Unfortunately I need to use !important here because of Prism's own
+  stylesheet */
+  overflow: hidden !important;
+  height: 200px;
+}
+
+/* Hide elements if no JavaScript is enabled */
+.no-js .no-js-d-none {
+  display: none;
+}

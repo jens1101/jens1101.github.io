@@ -24,27 +24,53 @@
  * @property {string} content
  */
 
+// TODO: wrap everything in an IIFE
+
+const githubUsername = 'jens1101'
+
 window.onload = async function main () {
+  // Remove the 'no-js' class from the document
+  document.documentElement.classList.remove('no-js')
   // TODO: add loading spinner
 
-  const gists = await getGists('jens1101')
+  // Get all the Gists
+  const gists = await getGists(githubUsername, 1, 6)
 
+  // Get the HTML template that will be used to display all the Gists
   const gistCardTemplate = document.getElementById('gist-card-template')
 
+  // Create a fragment to which all Gists will be added
+  const gistsFragment = document.createDocumentFragment()
+
+  // Generate the HTML for each Gist and append it to the fragment
   for (const gist of gists) {
     const gistCardElement = document.importNode(gistCardTemplate.content, true)
+
+    // Code formatting
     const codeElement = gistCardElement.querySelector('.card-img-top code')
     while (codeElement.firstChild) {
       codeElement.firstChild.remove()
     }
     codeElement.appendChild(document.createTextNode(gist.mainFile.content))
     codeElement.classList.add(gist.mainFile.languageClass)
-
     Prism.highlightElement(codeElement)
 
-    // TODO: use a document fragment instead and append all at the end
-    document.getElementById('my-gists').appendChild(gistCardElement)
+    // Name of the main file that acts as the Gist title
+    gistCardElement.querySelector('.card-title')
+      .textContent = gist.mainFile.filename
+
+    // Gist description
+    gistCardElement.querySelector('.card-text')
+      .textContent = gist.description
+
+    // Gist link
+    gistCardElement.querySelector('.gist-link').href = gist.url
+
+    gistsFragment.appendChild(gistCardElement)
   }
+
+  // Add the Gists to the document by appending the fragment
+  document.getElementById('my-gists').appendChild(gistsFragment)
 }
 
 /**
@@ -68,11 +94,11 @@ async function getPinnedRepos (username) {
 /**
  * Fetches all the public GitHub Gists of the specified user
  * @param {string} user The username of the user
- * @param {number} [page=1] The page offset
- * @param {number} [perPage=10] The number of Gists per page
+ * @param {number} page The page offset
+ * @param {number} perPage The number of Gists per page
  * @returns {Promise<Gist[]>} Resolves in an array of `Gist` objects
  */
-async function getGists (user, page = 1, perPage = 10) {
+async function getGists (user, page, perPage) {
   const url = new URL(`https://api.github.com/users/${user}/gists`)
   url.searchParams.append('page', `${page}`)
   url.searchParams.append('per_page', `${perPage}`)
@@ -100,7 +126,7 @@ async function getGists (user, page = 1, perPage = 10) {
    */
   const gistsPromises = rawGists.map(gist => {
     // Get the details of the first file in the gist
-    const mainFile = gist.files[Object.keys(gist.files).pop()]
+    const mainFile = gist.files[Object.keys(gist.files).shift()]
 
     // Fetch the contents of the main file and then resolve this gist as a valid
     // `Gist` object
@@ -114,7 +140,7 @@ async function getGists (user, page = 1, perPage = 10) {
           languageClass: `language-${mainFile.language.toLowerCase()}`,
           content
         },
-        url: new URL(gist.url)
+        url: new URL(gist.html_url)
       }))
   })
 
