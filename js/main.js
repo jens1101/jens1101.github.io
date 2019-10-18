@@ -24,6 +24,29 @@
  * @property {string} content
  */
 
+window.onload = async function main () {
+  // TODO: add loading spinner
+
+  const gists = await getGists('jens1101')
+
+  const gistCardTemplate = document.getElementById('gist-card-template')
+
+  for (const gist of gists) {
+    const gistCardElement = document.importNode(gistCardTemplate.content, true)
+    const codeElement = gistCardElement.querySelector('.card-img-top code')
+    while (codeElement.firstChild) {
+      codeElement.firstChild.remove()
+    }
+    codeElement.appendChild(document.createTextNode(gist.mainFile.content))
+    codeElement.classList.add(gist.mainFile.languageClass)
+
+    Prism.highlightElement(codeElement)
+
+    // TODO: use a document fragment instead and append all at the end
+    document.getElementById('my-gists').appendChild(gistCardElement)
+  }
+}
+
 /**
  * Gets all the pinned repos from GitHub for the specified user.
  * @param {string} username

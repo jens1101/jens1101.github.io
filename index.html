@@ -15,7 +15,7 @@
   <link href="vendor/prism-1.17.1/prism.css" rel="stylesheet">
 
   <script async src="js/main.js"></script>
-  <script async src="vendor/prism-1.17.1/prism.js"></script>
+  <script async data-manual src="vendor/prism-1.17.1/prism.js"></script>
 </head>
 
 <body>
@@ -73,17 +73,31 @@
     <section class="mb-5 py-3">
       <h2>My Gists</h2>
 
-      <div class="card" style="width: 18rem;">
-        <div class="card-img-top">
-          <pre class="m-0"><code class="language-css">p { color: red }</code></pre>
-        </div>
-        <div class="card-body">
-          <h5 class="card-title">Card title</h5>
-          <p class="card-text">Some quick example text to build on the card
-            title and make up the bulk of the card's content.</p>
-          <a class="btn btn-primary" href="#">Go somewhere</a>
-        </div>
+      <div id="my-gists">
+        <!-- Gist cards go here -->
       </div>
+
+      <template id="gist-card-template">
+        <div class="card">
+          <div class="card-img-top">
+            <pre class="m-0"><code>
+                <!-- Gist preview -->
+            </code></pre>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">
+              <!--  Gist name -->
+            </h5>
+            <p class="card-text">
+              <!-- Gist description -->
+            </p>
+            <a class="btn btn-primary" href="#">
+              <!-- Link to view Gist on GitHub -->
+            </a>
+          </div>
+        </div>
+      </template>
+
       <p>
         &#x2E3B; View all my gists on
         <a href="https://gist.github.com/jens1101">GitHub Gist</a> &#x2E3B;
@@ -97,7 +111,6 @@
         <small class="col">
           All rights reserved &copy; 2019 Jens Tschirpig
         </small>
-
       </div>
     </div>
   </footer>
