@@ -25,28 +25,40 @@
  * @property {URL} url
  */
 
-// TODO: wrap everything in an IIFE
-
-const githubUsername = 'jens1101'
-
-window.onload = async function main () {
+(function main () {
   // Remove the 'no-js' class from the document
   document.documentElement.classList.remove('no-js')
-  // TODO: add loading spinner
 
-  // Get all the Gists
-  const gists = await getGists(githubUsername, 1, 6)
+  window.addEventListener('DOMContentLoaded', () =>
+    loadGists('jens1101', 1, 6))
+})()
 
+async function loadGists (githubUsername, page, perPage) {
   // Get the HTML template that will be used to display all the Gists
   const gistCardTemplate = document.getElementById('gist-card-template')
 
   // Create a fragment to which all Gists will be added
   const gistsFragment = document.createDocumentFragment()
 
+  const gistElements = []
+
   // Generate the HTML for each Gist and append it to the fragment
-  for (const gist of gists) {
+  for (let i = 0; i < perPage; i++) {
     const gistFragment = document.importNode(gistCardTemplate.content, true)
     const gistCardElement = gistFragment.querySelector('.card')
+
+    gistsFragment.appendChild(gistFragment)
+    gistElements.push(gistCardElement)
+  }
+
+  // Add the Gists to the document by appending the fragment
+  document.getElementById('my-gists').appendChild(gistsFragment)
+
+  // Get all the Gists
+  const gists = await getGists(githubUsername, page, perPage)
+
+  for (const gist of gists) {
+    const gistCardElement = gistElements.shift()
 
     // Code formatting
     const codeElement = gistCardElement.querySelector('.card-img-top code')
@@ -76,12 +88,11 @@ window.onload = async function main () {
 
     // Gist link
     gistCardElement.querySelector('.gist-link').href = gist.url
-
-    gistsFragment.appendChild(gistFragment)
   }
 
-  // Add the Gists to the document by appending the fragment
-  document.getElementById('my-gists').appendChild(gistsFragment)
+  for (const gistElement of gistElements) {
+    gistElement.remove()
+  }
 }
 
 /**
