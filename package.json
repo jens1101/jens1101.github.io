@@ -4,7 +4,7 @@
   "description": "Jens Tschirpig personal website",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently serve \"open-cli http://localhost:5000/\""
+    "start": "concurrently \"serve -l 5050\" \"open-cli http://localhost:5050/\""
   },
   "repository": {
     "type": "git",
