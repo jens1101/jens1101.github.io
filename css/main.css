@@ -1,4 +1,4 @@
-.gist-preview {
+.gist-card--preview {
   /* Unfortunately I need to use !important here because of Prism's own
   stylesheet */
   overflow: hidden !important;
@@ -8,4 +8,13 @@
 /* Hide elements if no JavaScript is enabled */
 .no-js .no-js-d-none {
   display: none;
+}
+
+.gist-card__loading {
+  background: red;
+}
+
+.gist-card__loading > .card-img-top,
+.gist-card__loading > .card-body {
+  visibility: hidden;
 }

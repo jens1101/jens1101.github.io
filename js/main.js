@@ -21,7 +21,8 @@
  * @property {string} filename
  * @property {string} language
  * @property {string} languageClass
- * @property {string} content
+ * @property {string} [content]
+ * @property {URL} url
  */
 
 // TODO: wrap everything in an IIFE
@@ -44,16 +45,26 @@ window.onload = async function main () {
 
   // Generate the HTML for each Gist and append it to the fragment
   for (const gist of gists) {
-    const gistCardElement = document.importNode(gistCardTemplate.content, true)
+    const gistFragment = document.importNode(gistCardTemplate.content, true)
+    const gistCardElement = gistFragment.querySelector('.card')
 
     // Code formatting
     const codeElement = gistCardElement.querySelector('.card-img-top code')
     while (codeElement.firstChild) {
       codeElement.firstChild.remove()
     }
-    codeElement.appendChild(document.createTextNode(gist.mainFile.content))
-    codeElement.classList.add(gist.mainFile.languageClass)
-    Prism.highlightElement(codeElement)
+
+    fetchUrlAsText(gist.mainFile.url)
+      .then(content => {
+        gist.mainFile.content = content
+
+        codeElement.appendChild(document.createTextNode(gist.mainFile.content))
+        codeElement.classList.add(gist.mainFile.languageClass)
+        Prism.highlightElement(codeElement)
+
+        // Remove the "loading" class
+        gistCardElement.classList.remove('gist-card__loading')
+      })
 
     // Name of the main file that acts as the Gist title
     gistCardElement.querySelector('.card-title')
@@ -66,7 +77,7 @@ window.onload = async function main () {
     // Gist link
     gistCardElement.querySelector('.gist-link').href = gist.url
 
-    gistsFragment.appendChild(gistCardElement)
+    gistsFragment.appendChild(gistFragment)
   }
 
   // Add the Gists to the document by appending the fragment
@@ -119,30 +130,31 @@ async function getGists (user, page, perPage) {
   // much data and needs to be manipulated further.
   const rawGists = await result.json()
 
-  /**
-   * Contains an array of promises that each will resolve into a gist in the
-   * form that we want it in.
-   * @type Promise<Gist>[]
-   */
-  const gistsPromises = rawGists.map(gist => {
+  return rawGists.map(gist => {
     // Get the details of the first file in the gist
     const mainFile = gist.files[Object.keys(gist.files).shift()]
 
     // Fetch the contents of the main file and then resolve this gist as a valid
     // `Gist` object
-    return fetch(mainFile.raw_url)
-      .then(blob => blob.text())
-      .then(content => ({
-        description: gist.description,
-        mainFile: {
-          filename: mainFile.filename,
-          language: mainFile.language,
-          languageClass: `language-${mainFile.language.toLowerCase()}`,
-          content
-        },
-        url: new URL(gist.html_url)
-      }))
+    return {
+      description: gist.description,
+      url: new URL(gist.html_url),
+      mainFile: {
+        filename: mainFile.filename,
+        language: mainFile.language,
+        languageClass: `language-${mainFile.language.toLowerCase()}`,
+        url: new URL(mainFile.raw_url)
+      }
+    }
   })
+}
 
-  return await Promise.all(gistsPromises)
+async function fetchUrlAsText (url) {
+  const blob = await fetch(url.toString())
+
+  if (!blob.ok) {
+    throw new Error('Could not retrieve URL contents')
+  }
+
+  return await blob.text()
 }
