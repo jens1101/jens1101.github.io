@@ -44,7 +44,7 @@ async function loadGists (githubUsername, page, perPage) {
   // Generate the HTML for each Gist and append it to the fragment
   for (let i = 0; i < perPage; i++) {
     const gistFragment = document.importNode(gistCardTemplate.content, true)
-    const gistCardElement = gistFragment.querySelector('.gist-card')
+    const gistCardElement = gistFragment.querySelector('.card--async')
     // This creates a nice cascading effect while the gists are loading
     gistCardElement.style.animationDelay = `-${2 - ((i * 0.2) % 2)}s`
 
@@ -77,7 +77,7 @@ async function loadGists (githubUsername, page, perPage) {
         Prism.highlightElement(codeElement)
 
         // Remove the "loading" class
-        gistCardElement.classList.remove('gist-card__loading')
+        gistCardElement.classList.remove('card--loading')
       })
 
     // Name of the main file that acts as the Gist title
