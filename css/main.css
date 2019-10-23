@@ -1,3 +1,17 @@
+/* Hide elements if no JavaScript is enabled */
+.no-js .no-js-d-none {
+  display: none;
+}
+
+.gist-card {
+  transition: background-color 1s;
+}
+
+.gist-card > .card-img-top,
+.gist-card > .card-body {
+  transition: opacity 1s;
+}
+
 .gist-card--preview {
   /* Unfortunately I need to use !important here because of Prism's own
   stylesheet */
@@ -5,16 +19,24 @@
   height: 200px;
 }
 
-/* Hide elements if no JavaScript is enabled */
-.no-js .no-js-d-none {
-  display: none;
-}
-
 .gist-card__loading {
-  background: red;
+  animation-name: gist-card-load;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
 }
 
 .gist-card__loading > .card-img-top,
 .gist-card__loading > .card-body {
   visibility: hidden;
+  opacity: 0;
+}
+
+@keyframes gist-card-load {
+  from {
+    background-color: var(--dark);
+  }
+  to {
+    background-color: var(--light);
+  }
 }

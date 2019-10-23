@@ -25,12 +25,11 @@
  * @property {URL} url
  */
 
-(function main () {
+(async function main () {
   // Remove the 'no-js' class from the document
   document.documentElement.classList.remove('no-js')
 
-  window.addEventListener('DOMContentLoaded', () =>
-    loadGists('jens1101', 1, 6))
+  await loadGists('jens1101', 1, 6)
 })()
 
 async function loadGists (githubUsername, page, perPage) {
@@ -45,7 +44,9 @@ async function loadGists (githubUsername, page, perPage) {
   // Generate the HTML for each Gist and append it to the fragment
   for (let i = 0; i < perPage; i++) {
     const gistFragment = document.importNode(gistCardTemplate.content, true)
-    const gistCardElement = gistFragment.querySelector('.card')
+    const gistCardElement = gistFragment.querySelector('.gist-card')
+    // This creates a nice cascading effect while the gists are loading
+    gistCardElement.style.animationDelay = `-${2 - ((i * 0.2) % 2)}s`
 
     gistsFragment.appendChild(gistFragment)
     gistElements.push(gistCardElement)
@@ -58,6 +59,7 @@ async function loadGists (githubUsername, page, perPage) {
   const gists = await getGists(githubUsername, page, perPage)
 
   for (const gist of gists) {
+    // Remove and get the Gist element that's at the beginning of the array
     const gistCardElement = gistElements.shift()
 
     // Code formatting
@@ -90,6 +92,7 @@ async function loadGists (githubUsername, page, perPage) {
     gistCardElement.querySelector('.gist-link').href = gist.url
   }
 
+  // Remove any unused Gist elements.
   for (const gistElement of gistElements) {
     gistElement.remove()
   }
