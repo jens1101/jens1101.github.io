@@ -207,7 +207,10 @@ async function getGists (user, page, perPage) {
     const mainFile = gist.files[Object.keys(gist.files).shift()]
 
     // Fetch the contents of the main file and then resolve this gist as a valid
-    // `Gist` object
+    // `Gist` object.
+
+    // Inspections are suppressed here because I don't want to map out the
+    // entirety of GitHub's API.
     // noinspection JSUnresolvedVariable
     return {
       description: gist.description,
