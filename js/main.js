@@ -1,4 +1,12 @@
 /**
+ * Called in the `fillElements` function while iterating through the array of
+ * data that is given to the function. This is called once every iteration.
+ * @callback fillElementCallback
+ * @param {HTMLElement} element The HTML element of the current iteration
+ * @param {*} data The data of the current iteration
+ */
+
+/**
  * @typedef {Object} Repository
  * @property {string} repo The name of the repository
  * @property {string} description The description taken from the repository
@@ -33,16 +41,19 @@
 })()
 
 async function loadGists (githubUsername, page, perPage) {
-  // Get the HTML template that will be used to display all the Gists
-  const gistCardTemplate = document.getElementById('gist-card-template')
+  /**
+   * The HTML template that will be used to display all the Gists
+   * @type {HTMLTemplateElement}
+   */
+  const gistCardTemplate = document.querySelector('#gist-card-template')
 
   // Create a fragment to which all Gists will be added
-  // noinspection JSCheckFunctionSignatures
   const gistsFragment = cloneTemplate(gistCardTemplate, perPage)
 
   const gistCardElements =
     Array.from(gistsFragment.children)
          .map((element, index) => {
+           /** @type {HTMLElement} */
            const card = element.querySelector('.card--async')
 
            // Add animation delay. This creates a nice cascading effect while
@@ -59,17 +70,17 @@ async function loadGists (githubUsername, page, perPage) {
   // Get all the Gists
   const gists = await getGists(githubUsername, page, perPage)
 
-  for (const gist of gists) {
-    // Remove and get the Gist element that's at the beginning of the array
-    const gistCardElement = gistCardElements.shift()
-
-    // Code formatting
+  fillElements(gistCardElements, gists, (gistCardElement, gist) => {
+    // Remove all children of the code element. This is to prevent unexpected
+    // whitespace in the code preview.
     const codeElement = gistCardElement.querySelector('.card-img-top code')
     while (codeElement.firstChild) {
       codeElement.firstChild.remove()
     }
 
-    fetchUrlAsText(gist.mainFile.url)
+    // Fetch the main file's contents for the code preview
+    fetch(gist.mainFile.url.toString())
+      .then(blob => blob.text())
       .then(content => {
         gist.mainFile.content = content
 
@@ -91,12 +102,7 @@ async function loadGists (githubUsername, page, perPage) {
 
     // Gist link
     gistCardElement.querySelector('.card-link').href = gist.url
-  }
-
-  // Remove any unused Gist elements.
-  for (const gistElement of gistCardElements) {
-    gistElement.remove()
-  }
+  })
 }
 
 /**
@@ -118,7 +124,37 @@ function cloneTemplate (template, numberOfClones) {
   return documentFragment
 }
 
-// Fill x cards with content. Delete excess cards.
+/**
+ * Iterates over the data and elements arrays simultaneously. A callback is
+ * called on each iteration with the current element and data being sent as
+ * parameters.
+ *
+ * The iteration will stop once all data or elements have been iterated
+ * over.
+ *
+ * Once the iteration is completed then all leftover elements will be removed
+ * from the DOM.
+ * @param {HTMLElement[]} elements The array of elements to loop through.
+ * @param {Array} dataArray The array of data to loop through.
+ * @param {fillElementCallback} callback Triggers during each iteration. The
+ * current element and data is passed as arguments.
+ */
+function fillElements (elements, dataArray, callback) {
+  for (const data of dataArray) {
+    // Remove and get the element that's at the beginning of the array
+    const element = elements.shift()
+
+    // Stop the loop if no more elements are left
+    if (!element) break
+
+    callback(element, data)
+  }
+
+  // Remove any unused Gist elements.
+  for (const element of elements) {
+    element.remove()
+  }
+}
 
 /**
  * Gets all the pinned repos from GitHub for the specified user.
@@ -172,6 +208,7 @@ async function getGists (user, page, perPage) {
 
     // Fetch the contents of the main file and then resolve this gist as a valid
     // `Gist` object
+    // noinspection JSUnresolvedVariable
     return {
       description: gist.description,
       url: new URL(gist.html_url),
@@ -183,14 +220,4 @@ async function getGists (user, page, perPage) {
       }
     }
   })
-}
-
-async function fetchUrlAsText (url) {
-  const blob = await fetch(url.toString())
-
-  if (!blob.ok) {
-    throw new Error('Could not retrieve URL contents')
-  }
-
-  return await blob.text()
 }
