@@ -73,6 +73,42 @@
 
     <section class="mb-5 py-3">
       <h2 class="text-center">My Projects</h2>
+
+      <p>
+        These are projects that I work on during my spare time. They are mostly
+        created to fulfil a personal need or because I want to learn more about
+        a particular technology.
+      </p>
+
+      <div class="no-js-d-none">
+        <p class="mb-4">
+          My pinned projects are shown below:
+        </p>
+      </div>
+
+      <!-- Template used for each pinned repository -->
+      <template id="repo-card-template">
+        <div class="col-lg-6 mb-4">
+          <div class="card h-100 card--async card--loading">
+            <div class="card-body">
+              <h3 class="card-title">
+                <a href="#">
+                  <!-- Repo name and link -->
+                </a>
+              </h3>
+              <div class="card-text">
+                <p class="card-text__description">
+                  <!-- Repo description -->
+                </p>
+                <p class="card-text__language">
+                  <!-- Repo language -->
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+
       <p class="text-center">
         &#x2E3B; View all my projects on
         <a href="https://github.com/jens1101?tab=repositories">GitHub</a>
@@ -99,6 +135,7 @@
         </div>
       </div>
 
+      <!-- Template used for each Gist -->
       <template id="gist-card-template">
         <div class="col-lg-6 mb-4">
           <div class="card h-100 card--async card--loading">
