@@ -89,7 +89,7 @@ async function loadGists (githubUsername, page, perPage) {
       .textContent = gist.description
 
     // Gist link
-    gistCardElement.querySelector('.gist-link').href = gist.url
+    gistCardElement.querySelector('.card-link').href = gist.url
   }
 
   // Remove any unused Gist elements.
