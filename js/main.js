@@ -37,20 +37,21 @@ async function loadGists (githubUsername, page, perPage) {
   const gistCardTemplate = document.getElementById('gist-card-template')
 
   // Create a fragment to which all Gists will be added
-  const gistsFragment = document.createDocumentFragment()
+  // noinspection JSCheckFunctionSignatures
+  const gistsFragment = cloneTemplate(gistCardTemplate, perPage)
 
-  const gistElements = []
+  const gistCardElements =
+    Array.from(gistsFragment.children)
+         .map((element, index) => {
+           const card = element.querySelector('.card--async')
 
-  // Generate the HTML for each Gist and append it to the fragment
-  for (let i = 0; i < perPage; i++) {
-    const gistFragment = document.importNode(gistCardTemplate.content, true)
-    const gistCardElement = gistFragment.querySelector('.card--async')
-    // This creates a nice cascading effect while the gists are loading
-    gistCardElement.style.animationDelay = `-${2 - ((i * 0.2) % 2)}s`
+           // Add animation delay. This creates a nice cascading effect while
+           // the gists are loading
+           card.style.animationDelay =
+             `-${2 - ((index * 0.2) % 2)}s`
 
-    gistsFragment.appendChild(gistFragment)
-    gistElements.push(gistCardElement)
-  }
+           return card
+         })
 
   // Add the Gists to the document by appending the fragment
   document.getElementById('my-gists').appendChild(gistsFragment)
@@ -60,7 +61,7 @@ async function loadGists (githubUsername, page, perPage) {
 
   for (const gist of gists) {
     // Remove and get the Gist element that's at the beginning of the array
-    const gistCardElement = gistElements.shift()
+    const gistCardElement = gistCardElements.shift()
 
     // Code formatting
     const codeElement = gistCardElement.querySelector('.card-img-top code')
@@ -93,10 +94,31 @@ async function loadGists (githubUsername, page, perPage) {
   }
 
   // Remove any unused Gist elements.
-  for (const gistElement of gistElements) {
+  for (const gistElement of gistCardElements) {
     gistElement.remove()
   }
 }
+
+/**
+ * Clones the given HTML template a certain number of times into a new document
+ * fragment.
+ * @param {HTMLTemplateElement} template The template to clone
+ * @param {number} numberOfClones The number of times the template should be
+ * cloned
+ * @returns {DocumentFragment} The document fragment that contains all of the
+ * cloned templates
+ */
+function cloneTemplate (template, numberOfClones) {
+  const documentFragment = document.createDocumentFragment()
+
+  for (let i = 0; i < numberOfClones; i++) {
+    documentFragment.appendChild(document.importNode(template.content, true))
+  }
+
+  return documentFragment
+}
+
+// Fill x cards with content. Delete excess cards.
 
 /**
  * Gets all the pinned repos from GitHub for the specified user.
