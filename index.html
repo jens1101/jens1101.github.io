@@ -84,6 +84,10 @@
         <p class="mb-4">
           My pinned projects are shown below:
         </p>
+
+        <div class="row text-left" id="my-pinned-repos">
+          <!-- Gist cards go here -->
+        </div>
       </div>
 
       <!-- Template used for each pinned repository -->
@@ -92,7 +96,7 @@
           <div class="card h-100 card--async card--loading">
             <div class="card-body">
               <h3 class="card-title">
-                <a href="#">
+                <a class="card-title__link" href="#">
                   <!-- Repo name and link -->
                 </a>
               </h3>
@@ -104,7 +108,7 @@
                 <!-- TODO: use repo language shield. E.g.: https://img.shields.io/github/languages/top/jens1101/mini-pomodoro -->
                 <img alt="Repository language"
                      class="card-text__language"
-                     src="#">
+                     src="">
               </div>
             </div>
           </div>

@@ -37,8 +37,58 @@
   // Remove the 'no-js' class from the document
   document.documentElement.classList.remove('no-js')
 
-  await loadGists('jens1101', 1, 6)
+  loadGists('jens1101', 1, 6)
+
+  loadPinnedRepos('jens1101')
 })()
+
+async function loadPinnedRepos (githubUsername) {
+  /**
+   * The HTML template that will be used to display all the Repos
+   * @type {HTMLTemplateElement}
+   */
+  const repoCardTemplate = document.querySelector('#repo-card-template')
+
+  // Create a fragment to which all repos will be added to
+  const reposFragment = cloneTemplate(repoCardTemplate, 6)
+
+  const repoCardElements = staggerCardAnimation(reposFragment.children,
+    '.card--async', 2, 0.2)
+
+  // Add the Gists to the document by appending the fragment
+  document.getElementById('my-pinned-repos').appendChild(reposFragment)
+
+  // Get all the Gists
+  const repos = await getPinnedRepos(githubUsername)
+
+  fillElements(repoCardElements, repos, (repoCardElement, repo) => {
+    const titleLink = repoCardElement.querySelector('.card-title__link')
+    titleLink.textContent = repo.repo
+    titleLink.href = `https://github.com/${githubUsername}/${repo.repo}`
+
+    repoCardElement.querySelector('.card-text__description')
+      .textContent = repo.description
+
+    repoCardElement
+      .querySelector('.card-text__language')
+      .src(
+        `https://img.shields.io/github/languages/top/${githubUsername}/${repo.repo}`)
+  })
+}
+
+function staggerCardAnimation (elements, selector, animationDuration, offset) {
+  return Array.from(elements).map((element, index) => {
+    /** @type {HTMLElement} */
+    const card = element.querySelector(selector)
+
+    // Add animation delay. This creates a nice cascading effect while
+    // the gists are loading
+    card.style.animationDelay =
+      `-${animationDuration - ((index * offset) % animationDuration)}s`
+
+    return card
+  })
+}
 
 async function loadGists (githubUsername, page, perPage) {
   /**
