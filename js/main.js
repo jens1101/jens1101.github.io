@@ -33,6 +33,8 @@
  * @property {URL} url
  */
 
+// TODO: if an AJAX error occurs then remove the loading elements
+
 (async function main () {
   // Remove the 'no-js' class from the document
   document.documentElement.classList.remove('no-js')
