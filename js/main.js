@@ -8,13 +8,9 @@
 
 /**
  * @typedef {Object} Repository
- * @property {string} repo The name of the repository
+ * @property {string} name The name of the repository
  * @property {string} description The description taken from the repository
- * @property {string} owner The username of the owner of the repository
- * @property {string} language The primary language in which the repository is
- * written in
- * @property {number} stars The number or stars of the repository
- * @property {number} forks The number of forks taken from the repository
+ * @property {URL} url The HTML URL to view the repo
  */
 
 /**
@@ -64,9 +60,12 @@ async function loadPinnedRepos (githubUsername) {
   const repos = await getPinnedRepos(githubUsername)
 
   fillElements(repoCardElements, repos, (repoCardElement, repo) => {
+    /**
+     * @type {HTMLAnchorElement}
+     */
     const titleLink = repoCardElement.querySelector('.card-title__link')
-    titleLink.textContent = repo.repo
-    titleLink.href = `https://github.com/${githubUsername}/${repo.repo}`
+    titleLink.textContent = repo.name
+    titleLink.href = repo.url.toString()
 
     repoCardElement.querySelector('.card-text__description')
       .textContent = repo.description
@@ -74,7 +73,7 @@ async function loadPinnedRepos (githubUsername) {
     repoCardElement
       .querySelector('.card-text__language')
       .src(
-        `https://img.shields.io/github/languages/top/${githubUsername}/${repo.repo}`)
+        `https://img.shields.io/github/languages/top/${githubUsername}/${repo.name}`)
   })
 }
 
@@ -214,8 +213,7 @@ function fillElements (elements, dataArray, callback) {
  * @returns {Promise<Repository[]>}
  */
 async function getPinnedRepos (username) {
-  const url = new URL('https://gh-pinned-repos.now.sh/')
-  url.searchParams.append('username', username)
+  const url = new URL(`https://github.com/${username}`)
 
   const result = await fetch(url.toString())
 
@@ -223,7 +221,22 @@ async function getPinnedRepos (username) {
     throw new Error('Could not retrieve pinned repos')
   }
 
-  return await result.json()
+  const documentString = await result.text()
+  const profilePage = (new DOMParser()).parseFromString(documentString,
+    'text/html')
+
+  const pinnedRepos = Array.from(profilePage
+    .querySelectorAll('.pinned-item-list-item.public'))
+
+  return pinnedRepos.map(pinnedRepo => {
+    const name = pinnedRepo.querySelector('.repo').textContent.trim()
+    const description = pinnedRepo.querySelector('.pinned-item-desc')
+                                  .textContent
+                                  .trim()
+    const url = new URL(`https://github.com/${username}/${name}`)
+
+    return { name, description, url }
+  })
 }
 
 /**
