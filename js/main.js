@@ -32,15 +32,19 @@
 // TODO: if an AJAX error occurs then remove the loading elements
 
 (async function main () {
+  const githubToken = 'cdbf893cfdb6b48b97b0c498195b5f9ca9593329'
+  const githubUsername = 'jens1101'
+  const limit = 5
+
   // Remove the 'no-js' class from the document
   document.documentElement.classList.remove('no-js')
 
-  loadGists('jens1101', 1, 6)
+  loadGists(githubUsername, 1, 6)
 
-  loadPinnedRepos('jens1101')
+  loadPinnedRepos(githubUsername, githubToken, limit)
 })()
 
-async function loadPinnedRepos (githubUsername) {
+async function loadPinnedRepos (githubUsername, githubToken, limit) {
   /**
    * The HTML template that will be used to display all the Repos
    * @type {HTMLTemplateElement}
@@ -48,7 +52,7 @@ async function loadPinnedRepos (githubUsername) {
   const repoCardTemplate = document.querySelector('#repo-card-template')
 
   // Create a fragment to which all repos will be added to
-  const reposFragment = cloneTemplate(repoCardTemplate, 6)
+  const reposFragment = cloneTemplate(repoCardTemplate, limit)
 
   const repoCardElements = staggerCardAnimation(reposFragment.children,
     '.card--async', 2, 0.2)
@@ -57,7 +61,7 @@ async function loadPinnedRepos (githubUsername) {
   document.getElementById('my-pinned-repos').appendChild(reposFragment)
 
   // Get all the Gists
-  const repos = await getPinnedRepos(githubUsername)
+  const repos = await getPinnedRepos(githubUsername, githubToken, limit)
 
   fillElements(repoCardElements, repos, (repoCardElement, repo) => {
     /**
@@ -72,8 +76,10 @@ async function loadPinnedRepos (githubUsername) {
 
     repoCardElement
       .querySelector('.card-text__language')
-      .src(
-        `https://img.shields.io/github/languages/top/${githubUsername}/${repo.name}`)
+      .src = `https://img.shields.io/github/languages/top/${githubUsername}/${repo.name}`
+
+    // Remove the "loading" class
+    repoCardElement.classList.remove('card--loading')
   })
 }
 
@@ -209,34 +215,53 @@ function fillElements (elements, dataArray, callback) {
 
 /**
  * Gets all the pinned repos from GitHub for the specified user.
- * @param {string} username
+ * @param {string} githubUsername
+ * @param {string} githubToken
+ * @param {number} limit
  * @returns {Promise<Repository[]>}
  */
-async function getPinnedRepos (username) {
-  const url = new URL(`https://github.com/${username}`)
+async function getPinnedRepos (githubUsername, githubToken, limit) {
+  const query = `query{
+      repositoryOwner(login: "${githubUsername}") {
+        ... on User {
+          pinnedRepositories(first: ${limit}) {
+            edges {
+              node {
+                name,
+                description,
+                url
+              }
+            }
+          }
+        }
+      }
+    }`
+  const result = await callGithubApi(githubToken, query,
+    'Could not retrieve pinned repos')
 
-  const result = await fetch(url.toString())
+  // noinspection JSUnresolvedVariable
+  return result.data.repositoryOwner.pinnedRepositories.edges.map(edge => ({
+    name: edge.node.name,
+    description: edge.node.description,
+    url: new URL(edge.node.url)
+  }))
+}
+
+async function callGithubApi (token, query, errorMessage) {
+  const result = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `bearer ${token}`
+    },
+    body: JSON.stringify({ query })
+  })
 
   if (!result.ok) {
-    throw new Error('Could not retrieve pinned repos')
+    throw new Error(errorMessage || 'Error while fetching data from server')
   }
 
-  const documentString = await result.text()
-  const profilePage = (new DOMParser()).parseFromString(documentString,
-    'text/html')
-
-  const pinnedRepos = Array.from(profilePage
-    .querySelectorAll('.pinned-item-list-item.public'))
-
-  return pinnedRepos.map(pinnedRepo => {
-    const name = pinnedRepo.querySelector('.repo').textContent.trim()
-    const description = pinnedRepo.querySelector('.pinned-item-desc')
-                                  .textContent
-                                  .trim()
-    const url = new URL(`https://github.com/${username}/${name}`)
-
-    return { name, description, url }
-  })
+  return await result.json()
 }
 
 /**
@@ -260,7 +285,7 @@ async function getGists (user, page, perPage) {
   })
 
   if (!result.ok) {
-    throw new Error('Could not retrieve pinned repos')
+    throw new Error('Could not retrieve gists')
   }
 
   // Get the raw results from the API call. This array of objects contains too
