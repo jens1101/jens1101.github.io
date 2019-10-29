@@ -30,6 +30,11 @@
  */
 
 // TODO: if an AJAX error occurs then remove the loading elements
+// TODO: make gists use graphql
+// TODO: remove `page` parameters, because I won't be using them
+// TODO: rename `perPage` to `limit`
+// TODO: make gists use the same convenience functions as repos do
+// TODO: update documentation
 
 (async function main () {
   const githubToken = 'cdbf893cfdb6b48b97b0c498195b5f9ca9593329'
@@ -39,7 +44,7 @@
   // Remove the 'no-js' class from the document
   document.documentElement.classList.remove('no-js')
 
-  loadGists(githubUsername, 1, 6)
+  loadGists(githubUsername, githubToken, limit)
 
   loadPinnedRepos(githubUsername, githubToken, limit)
 })()
@@ -97,7 +102,7 @@ function staggerCardAnimation (elements, selector, animationDuration, offset) {
   })
 }
 
-async function loadGists (githubUsername, page, perPage) {
+async function loadGists (githubUsername, githubToken, limit) {
   /**
    * The HTML template that will be used to display all the Gists
    * @type {HTMLTemplateElement}
@@ -105,27 +110,16 @@ async function loadGists (githubUsername, page, perPage) {
   const gistCardTemplate = document.querySelector('#gist-card-template')
 
   // Create a fragment to which all Gists will be added
-  const gistsFragment = cloneTemplate(gistCardTemplate, perPage)
+  const gistsFragment = cloneTemplate(gistCardTemplate, limit)
 
-  const gistCardElements =
-    Array.from(gistsFragment.children)
-         .map((element, index) => {
-           /** @type {HTMLElement} */
-           const card = element.querySelector('.card--async')
-
-           // Add animation delay. This creates a nice cascading effect while
-           // the gists are loading
-           card.style.animationDelay =
-             `-${2 - ((index * 0.2) % 2)}s`
-
-           return card
-         })
+  const gistCardElements = staggerCardAnimation(gistsFragment.children,
+    '.card--async', 2, 0.2)
 
   // Add the Gists to the document by appending the fragment
   document.getElementById('my-gists').appendChild(gistsFragment)
 
   // Get all the Gists
-  const gists = await getGists(githubUsername, page, perPage)
+  const gists = await getGists(githubUsername, githubToken, limit)
 
   fillElements(gistCardElements, gists, (gistCardElement, gist) => {
     // Remove all children of the code element. This is to prevent unexpected
@@ -272,6 +266,22 @@ async function callGithubApi (token, query, errorMessage) {
  * @returns {Promise<Gist[]>} Resolves in an array of `Gist` objects
  */
 async function getGists (user, page, perPage) {
+  const query = `query{
+      repositoryOwner(login: "${githubUsername}") {
+        ... on User {
+          pinnedRepositories(first: ${limit}) {
+            edges {
+              node {
+                name,
+                description,
+                url
+              }
+            }
+          }
+        }
+      }
+    }`
+
   const url = new URL(`https://api.github.com/users/${user}/gists`)
   url.searchParams.append('page', `${page}`)
   url.searchParams.append('per_page', `${perPage}`)
