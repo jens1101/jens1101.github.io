@@ -221,26 +221,26 @@ function fillElements (elements, dataArray, callback) {
  * @returns {Promise<Repository[]>}
  */
 async function getPinnedRepos (githubUsername, githubToken, limit) {
-  const query = `query{
-      repositoryOwner(login: "${githubUsername}") {
-        ... on User {
-          pinnedRepositories(first: ${limit}) {
-            edges {
-              node {
-                name,
-                description,
-                url
-              }
+  const query = `query {
+    user(login: "jens1101") {
+      pinnedItems(first: 5, types: [REPOSITORY]) {
+        edges {
+          node {
+            ... on Repository {
+              name
+              description
+              url
             }
           }
         }
       }
-    }`
+    }
+  }`
   const result = await callGithubApi(githubToken, query,
     'Could not retrieve pinned repos')
 
   // noinspection JSUnresolvedVariable
-  return result.data.repositoryOwner.pinnedRepositories.edges.map(edge => ({
+  return result.data.user.pinnedItems.edges.map(edge => ({
     name: edge.node.name,
     description: edge.node.description,
     url: new URL(edge.node.url)
