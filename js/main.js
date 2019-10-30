@@ -1,12 +1,4 @@
 /**
- * Called in the `fillElements` function while iterating through the array of
- * data that is given to the function. This is called once every iteration.
- * @callback fillElementCallback
- * @param {HTMLElement} element The HTML element of the current iteration
- * @param {*} data The data of the current iteration
- */
-
-/**
  * @typedef {Object} Repository
  * @property {string} name The name of the repository
  * @property {string} description The description taken from the repository
@@ -16,17 +8,20 @@
 /**
  * @typedef {Object} Gist
  * @property {string} description
- * @property {GistFile} mainFile
  * @property {URL} url
+ * @property {GistFile[]} files
  */
 
 /**
  * @typedef {Object} GistFile
- * @property {string} filename
- * @property {string} language
- * @property {string} languageClass
- * @property {string} [content]
- * @property {URL} url
+ * @property {string} name
+ * @property {Language} language
+ * @property {string} text
+ */
+
+/**
+ * @typedef {Object} Language
+ * @property {string} name
  */
 
 // TODO: if an AJAX error occurs then remove the loading elements
@@ -44,9 +39,10 @@
   // Remove the 'no-js' class from the document
   document.documentElement.classList.remove('no-js')
 
-  loadGists(githubUsername, githubToken, limit)
-
-  loadPinnedRepos(githubUsername, githubToken, limit)
+  await Promise.all([
+    loadGists(githubUsername, githubToken, limit),
+    loadPinnedRepos(githubUsername, githubToken, limit)
+  ])
 })()
 
 async function loadPinnedRepos (githubUsername, githubToken, limit) {
@@ -129,23 +125,17 @@ async function loadGists (githubUsername, githubToken, limit) {
       codeElement.firstChild.remove()
     }
 
-    // Fetch the main file's contents for the code preview
-    fetch(gist.mainFile.url.toString())
-      .then(blob => blob.text())
-      .then(content => {
-        gist.mainFile.content = content
+    codeElement.appendChild(document.createTextNode(gist.files[0].text))
+    codeElement.classList.add(
+      `language-${gist.files[0].language.name.toLowerCase()}`)
+    Prism.highlightElement(codeElement)
 
-        codeElement.appendChild(document.createTextNode(gist.mainFile.content))
-        codeElement.classList.add(gist.mainFile.languageClass)
-        Prism.highlightElement(codeElement)
-
-        // Remove the "loading" class
-        gistCardElement.classList.remove('card--loading')
-      })
+    // Remove the "loading" class
+    gistCardElement.classList.remove('card--loading')
 
     // Name of the main file that acts as the Gist title
     gistCardElement.querySelector('.card-title')
-      .textContent = gist.mainFile.filename
+      .textContent = gist.files[0].name
 
     // Gist description
     gistCardElement.querySelector('.card-text')
@@ -185,10 +175,11 @@ function cloneTemplate (template, numberOfClones) {
  *
  * Once the iteration is completed then all leftover elements will be removed
  * from the DOM.
+ * @template T
  * @param {HTMLElement[]} elements The array of elements to loop through.
- * @param {Array} dataArray The array of data to loop through.
- * @param {fillElementCallback} callback Triggers during each iteration. The
- * current element and data is passed as arguments.
+ * @param {Array<T>} dataArray The array of data to loop through.
+ * @param {function(HTMLElement, T)} callback Triggers during each iteration.
+ *   The current element and data is passed as arguments.
  */
 function fillElements (elements, dataArray, callback) {
   for (const data of dataArray) {
@@ -260,67 +251,37 @@ async function callGithubApi (token, query, errorMessage) {
 
 /**
  * Fetches all the public GitHub Gists of the specified user
- * @param {string} user The username of the user
- * @param {number} page The page offset
- * @param {number} perPage The number of Gists per page
+ * @param {string} githubUsername
+ * @param {string} githubToken
+ * @param {number} limit
  * @returns {Promise<Gist[]>} Resolves in an array of `Gist` objects
  */
-async function getGists (user, page, perPage) {
-  const query = `query{
-      repositoryOwner(login: "${githubUsername}") {
-        ... on User {
-          pinnedRepositories(first: ${limit}) {
-            edges {
-              node {
-                name,
-                description,
-                url
+async function getGists (githubUsername, githubToken, limit) {
+  const query = `query {
+    user(login: "${githubUsername}") {
+      gists(first: ${limit}, orderBy: {field: CREATED_AT, direction: DESC}) {
+        edges {
+          node {
+            ... on Gist {
+              description
+              url
+              files(limit: 1) {
+                name
+                language {
+                  name
+                }
+                text(truncate: 600)
               }
             }
           }
         }
       }
-    }`
-
-  const url = new URL(`https://api.github.com/users/${user}/gists`)
-  url.searchParams.append('page', `${page}`)
-  url.searchParams.append('per_page', `${perPage}`)
-
-  // Fetch the gists
-  const result = await fetch(url.toString(), {
-    method: 'GET',
-    headers: new Headers({
-      'Accept': 'application/vnd.github.v3+json'
-    })
-  })
-
-  if (!result.ok) {
-    throw new Error('Could not retrieve gists')
-  }
-
-  // Get the raw results from the API call. This array of objects contains too
-  // much data and needs to be manipulated further.
-  const rawGists = await result.json()
-
-  return rawGists.map(gist => {
-    // Get the details of the first file in the gist
-    const mainFile = gist.files[Object.keys(gist.files).shift()]
-
-    // Fetch the contents of the main file and then resolve this gist as a valid
-    // `Gist` object.
-
-    // Inspections are suppressed here because I don't want to map out the
-    // entirety of GitHub's API.
-    // noinspection JSUnresolvedVariable
-    return {
-      description: gist.description,
-      url: new URL(gist.html_url),
-      mainFile: {
-        filename: mainFile.filename,
-        language: mainFile.language,
-        languageClass: `language-${mainFile.language.toLowerCase()}`,
-        url: new URL(mainFile.raw_url)
-      }
     }
-  })
+  }`
+
+  const result = await callGithubApi(githubToken, query,
+    'Could not retrieve pinned repos')
+
+  // noinspection JSUnresolvedVariable
+  return result.data.user.gists.edges.map(edge => edge.node)
 }
