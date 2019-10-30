@@ -2,13 +2,13 @@
  * @typedef {Object} Repository
  * @property {string} name The name of the repository
  * @property {string} description The description taken from the repository
- * @property {URL} url The HTML URL to view the repo
+ * @property {string} url The HTML URL to view the repo
  */
 
 /**
  * @typedef {Object} Gist
  * @property {string} description
- * @property {URL} url
+ * @property {string} url
  * @property {GistFile[]} files
  */
 
@@ -24,8 +24,8 @@
  * @property {string} name
  */
 
+// TODO: make these JS objects match the structure of the GraphQL objects
 // TODO: if an AJAX error occurs then remove the loading elements
-// TODO: make gists use graphql
 // TODO: remove `page` parameters, because I won't be using them
 // TODO: rename `perPage` to `limit`
 // TODO: make gists use the same convenience functions as repos do
@@ -225,11 +225,7 @@ async function getPinnedRepos (githubUsername, githubToken, limit) {
     'Could not retrieve pinned repos')
 
   // noinspection JSUnresolvedVariable
-  return result.data.user.pinnedItems.edges.map(edge => ({
-    name: edge.node.name,
-    description: edge.node.description,
-    url: new URL(edge.node.url)
-  }))
+  return result.data.user.pinnedItems.edges.map(edge => edge.node)
 }
 
 async function callGithubApi (token, query, errorMessage) {
