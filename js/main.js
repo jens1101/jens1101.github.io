@@ -88,12 +88,12 @@ async function loadPinnedRepos (githubUsername, githubToken, limit) {
       .textContent = repo.description
 
     // Add the repository's language shield
-    repoCardElement
-      .querySelector('.card-text__language')
-      .src = `https://img.shields.io/github/languages/top/${githubUsername}/${repo.name}`
-
-    // Remove the "loading" class
-    repoCardElement.classList.remove('card--loading')
+    const languageShield = repoCardElement.querySelector('.card-text__language')
+    languageShield.addEventListener('load', () => {
+      // Remove the "loading" class only once the image has been loaded
+      repoCardElement.classList.remove('card--loading')
+    }, { once: true, passive: true })
+    languageShield.src = `https://img.shields.io/github/languages/top/${githubUsername}/${repo.name}`
   })
 }
 
