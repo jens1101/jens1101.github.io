@@ -24,24 +24,34 @@
  * @property {string} name
  */
 
-// TODO: make these JS objects match the structure of the GraphQL objects
 // TODO: if an AJAX error occurs then remove the loading elements
-// TODO: remove `page` parameters, because I won't be using them
-// TODO: rename `perPage` to `limit`
-// TODO: make gists use the same convenience functions as repos do
 // TODO: update documentation
 
 (async function main () {
+  /**
+   * A simple public read-only token to use with GitHub's GraphQL API
+   * @type {string}
+   */
   const githubToken = 'cdbf893cfdb6b48b97b0c498195b5f9ca9593329'
+  /**
+   * My GitHub user name. This is used to only get my own pinned repos and
+   * gists.
+   * @type {string}
+   */
   const githubUsername = 'jens1101'
-  const limit = 5
+  /**
+   * The number of gists and pinned repos to load in the home page.
+   * @type {number}
+   */
+  const limit = 6
 
   // Remove the 'no-js' class from the document
   document.documentElement.classList.remove('no-js')
 
+  // Load all the gists and pinned repos
   await Promise.all([
-    loadGists(githubUsername, githubToken, limit),
-    loadPinnedRepos(githubUsername, githubToken, limit)
+    loadPinnedRepos(githubUsername, githubToken, limit),
+    loadGists(githubUsername, githubToken, limit)
   ])
 })()
 
