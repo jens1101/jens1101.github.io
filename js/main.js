@@ -56,20 +56,8 @@
 })()
 
 async function loadPinnedRepos (githubUsername, githubToken, limit) {
-  /**
-   * The HTML template that will be used to display all the Repos
-   * @type {HTMLTemplateElement}
-   */
-  const repoCardTemplate = document.querySelector('#repo-card-template')
-
-  // Create a fragment to which all repos will be added to
-  const reposFragment = cloneTemplate(repoCardTemplate, limit)
-
-  const repoCardElements = staggerCardAnimation(reposFragment.children,
-    '.card--async', 2, 0.2)
-
-  // Add the Gists to the document by appending the fragment
-  document.getElementById('my-pinned-repos').appendChild(reposFragment)
+  const repoCardElements = initCards('#repo-card-template',
+    '#my-pinned-repos', limit)
 
   // Get all the Gists
   const repos = await getPinnedRepos(githubUsername, githubToken, limit)
@@ -94,35 +82,68 @@ async function loadPinnedRepos (githubUsername, githubToken, limit) {
   })
 }
 
-function staggerCardAnimation (elements, selector, animationDuration, offset) {
-  return Array.from(elements).map((element, index) => {
+/**
+ * Initialises the cards that are used to display the repos and gists.
+ *
+ * This selects the given template, clones it the specified number of times,
+ * adds an animation delay for the loading animation, and finally adds all the
+ * cloned card elements to the document.
+ * @param {string} templateSelector A CSS selector string to select the
+ * `template` element that needs to be cloned.
+ * @param {string} targetSelector A CSS selector specifying where the cloned
+ * cards need to be added to.
+ * @param {number} numberOfClones The number times the specified card template
+ * needs to be cloned
+ * @returns {HTMLElement[]} An array of card elements that have been added to
+ * the document.
+ */
+function initCards (templateSelector, targetSelector, numberOfClones) {
+  /**
+   * The HTML template that will be used to display all the Repos
+   * @type {HTMLTemplateElement}
+   */
+  const templateElement = document.querySelector(templateSelector)
+  /**
+   * The fragment to which all the cloned elements will be added to
+   * @type {DocumentFragment}
+   */
+  const fragment = document.createDocumentFragment()
+  /**
+   * All of the elements with the class `card--async` that have been added to
+   * the document fragment.
+   * @type {HTMLElement[]}
+   */
+  const cardElements = []
+
+  // Clone the template the specified number of times and add it to the
+  // fragment
+  for (let i = 0; i < numberOfClones; i++) {
+    const cardElement = document.importNode(templateElement.content, true)
+    fragment.appendChild(cardElement)
+  }
+
+  // For each element that has been added to the fragment: select the card
+  // element, add an animation delay, and add it to the `cardElements` array.
+  for (const [index, element] of Array.from(fragment.children).entries()) {
     /** @type {HTMLElement} */
-    const card = element.querySelector(selector)
+    const card = element.querySelector('.card--async')
 
-    // Add animation delay. This creates a nice cascading effect while
-    // the gists are loading
-    card.style.animationDelay =
-      `-${animationDuration - ((index * offset) % animationDuration)}s`
+    // Add animation delay. This creates a nice cascading effect while the
+    // cards are loading
+    card.style.animationDelay = `-${2 -
+    ((index * 0.2) % 2)}s`
 
-    return card
-  })
+    cardElements.push(card)
+  }
+
+  // Add the Gists to the document by appending the fragment
+  document.querySelector(targetSelector).appendChild(fragment)
+
+  return cardElements
 }
 
 async function loadGists (githubUsername, githubToken, limit) {
-  /**
-   * The HTML template that will be used to display all the Gists
-   * @type {HTMLTemplateElement}
-   */
-  const gistCardTemplate = document.querySelector('#gist-card-template')
-
-  // Create a fragment to which all Gists will be added
-  const gistsFragment = cloneTemplate(gistCardTemplate, limit)
-
-  const gistCardElements = staggerCardAnimation(gistsFragment.children,
-    '.card--async', 2, 0.2)
-
-  // Add the Gists to the document by appending the fragment
-  document.getElementById('my-gists').appendChild(gistsFragment)
+  const gistCardElements = initCards('#gist-card-template', '#my-gists', limit)
 
   // Get all the Gists
   const gists = await getGists(githubUsername, githubToken, limit)
@@ -154,25 +175,6 @@ async function loadGists (githubUsername, githubToken, limit) {
     // Gist link
     gistCardElement.querySelector('.card-link').href = gist.url
   })
-}
-
-/**
- * Clones the given HTML template a certain number of times into a new document
- * fragment.
- * @param {HTMLTemplateElement} template The template to clone
- * @param {number} numberOfClones The number of times the template should be
- * cloned
- * @returns {DocumentFragment} The document fragment that contains all of the
- * cloned templates
- */
-function cloneTemplate (template, numberOfClones) {
-  const documentFragment = document.createDocumentFragment()
-
-  for (let i = 0; i < numberOfClones; i++) {
-    documentFragment.appendChild(document.importNode(template.content, true))
-  }
-
-  return documentFragment
 }
 
 /**
