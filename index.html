@@ -85,6 +85,13 @@
           My pinned projects are shown below:
         </p>
 
+        <div class="alert alert-danger"
+             hidden
+             id="pinned-repos-errors"
+             role="alert">
+          <!-- Add any repo-related errors here -->
+        </div>
+
         <div class="row text-left" id="my-pinned-repos">
           <!-- Gist cards go here -->
         </div>
@@ -134,6 +141,10 @@
         <p class="mb-4">
           My most recent gists are shown below:
         </p>
+
+        <div class="alert alert-danger" hidden id="gists-errors" role="alert">
+          <!-- Add any gist-related errors here -->
+        </div>
 
         <div class="row text-left" id="my-gists">
           <!-- Gist cards go here -->

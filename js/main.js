@@ -24,8 +24,6 @@
  * @property {string} name
  */
 
-// TODO: if an AJAX error occurs then remove the loading elements
-
 (async function main () {
   /**
    * A simple public read-only token to use with GitHub's GraphQL API
@@ -64,37 +62,58 @@
  */
 async function loadPinnedRepos (githubUsername, githubToken, limit) {
   /**
+   * The HTML template that will be used to display all the Repos
+   * @type {HTMLTemplateElement}
+   */
+  const templateElement = document.querySelector('#repo-card-template')
+  /**
+   * The element into which all the gists will loaded
+   * @type {HTMLElement}
+   */
+  const targetElement = document.querySelector('#my-pinned-repos')
+  /**
    * All the card elements that will be populated
    * @type {HTMLElement[]}
    */
-  const repoCardElements = initCards('#repo-card-template',
-    '#my-pinned-repos', limit)
-  /**
-   * All of the pinned repositories that need to be loaded into the card
-   * elements
-   * @type {Repository[]}
-   */
-  const repos = await getPinnedRepos(githubUsername, githubToken, limit)
+  const repoCardElements = initCards(templateElement, targetElement, limit)
 
-  fillElements(repoCardElements, repos, (repoCardElement, repo) => {
-    // Add the repository name and link
-    /** @type {HTMLAnchorElement} */
-    const titleLink = repoCardElement.querySelector('.card-title__link')
-    titleLink.textContent = repo.name
-    titleLink.href = repo.url.toString()
+  try {
+    /**
+     * All of the pinned repositories that need to be loaded into the card
+     * elements
+     * @type {Repository[]}
+     */
+    const repos = await getPinnedRepos(githubUsername, githubToken, limit)
 
-    // Add the repository description
-    repoCardElement.querySelector('.card-text__description')
-      .textContent = repo.description
+    fillElements(repoCardElements, repos, (repoCardElement, repo) => {
+      // Add the repository name and link
+      /** @type {HTMLAnchorElement} */
+      const titleLink = repoCardElement.querySelector('.card-title__link')
+      titleLink.textContent = repo.name
+      titleLink.href = repo.url.toString()
 
-    // Add the repository's language shield
-    const languageShield = repoCardElement.querySelector('.card-text__language')
-    languageShield.addEventListener('load', () => {
-      // Remove the "loading" class only once the image has been loaded
-      repoCardElement.classList.remove('card--loading')
-    }, { once: true, passive: true })
-    languageShield.src = `https://img.shields.io/github/languages/top/${githubUsername}/${repo.name}`
-  })
+      // Add the repository description
+      repoCardElement.querySelector('.card-text__description')
+        .textContent = repo.description
+
+      // Add the repository's language shield
+      const languageShield = repoCardElement.querySelector(
+        '.card-text__language')
+      languageShield.addEventListener('load', () => {
+        // Remove the "loading" class only once the image has been loaded
+        repoCardElement.classList.remove('card--loading')
+      }, { once: true, passive: true })
+      languageShield.src = `https://img.shields.io/github/languages/top/${githubUsername}/${repo.name}`
+    })
+  } catch (error) {
+    // Hide the target element in which the gists would have been placed
+    targetElement.setAttribute('hidden', 'hidden')
+
+    // Populate the error alert and show it
+    const alertElement = document.querySelector('#pinned-repos-errors')
+    alertElement.textContent = error.message
+    alertElement.removeAttribute('hidden')
+  }
 }
 
 /**
@@ -106,44 +125,65 @@ async function loadPinnedRepos (githubUsername, githubToken, limit) {
  */
 async function loadGists (githubUsername, githubToken, limit) {
   /**
+   * The HTML template that will be used to display all the Repos
+   * @type {HTMLTemplateElement}
+   */
+  const templateElement = document.querySelector('#gist-card-template')
+  /**
+   * The element into which all the gists will loaded
+   * @type {HTMLElement}
+   */
+  const targetElement = document.querySelector('#my-gists')
+  /**
    * All the card elements that will be populated
    * @type {HTMLElement[]}
    */
-  const gistCardElements = initCards('#gist-card-template', '#my-gists', limit)
-  /**
-   * All of the gists that need to be loaded into the card elements
-   * @type {Gist[]}
-   */
-  const gists = await getGists(githubUsername, githubToken, limit)
+  const gistCardElements = initCards(templateElement, targetElement, limit)
 
-  fillElements(gistCardElements, gists, (gistCardElement, gist) => {
-    // Remove all children of the code element. This is to prevent unexpected
-    // whitespace in the code preview.
-    const codeElement = gistCardElement.querySelector('.card-img-top code')
-    while (codeElement.firstChild) {
-      codeElement.firstChild.remove()
-    }
+  try {
+    /**
+     * All of the gists that need to be loaded into the card elements
+     * @type {Gist[]}
+     */
+    const gists = await getGists(githubUsername, githubToken, limit)
 
-    // Add the code text and highlight it.
-    codeElement.appendChild(document.createTextNode(gist.files[0].text))
-    codeElement.classList.add(
-      `language-${gist.files[0].language.name.toLowerCase()}`)
-    Prism.highlightElement(codeElement)
+    fillElements(gistCardElements, gists, (gistCardElement, gist) => {
+      // Remove all children of the code element. This is to prevent unexpected
+      // whitespace in the code preview.
+      const codeElement = gistCardElement.querySelector('.card-img-top code')
+      while (codeElement.firstChild) {
+        codeElement.firstChild.remove()
+      }
 
-    // Remove the "loading" class
-    gistCardElement.classList.remove('card--loading')
+      // Add the code text and highlight it.
+      codeElement.appendChild(document.createTextNode(gist.files[0].text))
+      codeElement.classList.add(
+        `language-${gist.files[0].language.name.toLowerCase()}`)
+      Prism.highlightElement(codeElement)
 
-    // Name of the main file that acts as the Gist title
-    gistCardElement.querySelector('.card-title')
-      .textContent = gist.files[0].name
+      // Remove the "loading" class
+      gistCardElement.classList.remove('card--loading')
 
-    // Gist description
-    gistCardElement.querySelector('.card-text')
-      .textContent = gist.description
+      // Name of the main file that acts as the Gist title
+      gistCardElement.querySelector('.card-title')
+        .textContent = gist.files[0].name
 
-    // Gist link
-    gistCardElement.querySelector('.card-link').href = gist.url
-  })
+      // Gist description
+      gistCardElement.querySelector('.card-text')
+        .textContent = gist.description
+
+      // Gist link
+      gistCardElement.querySelector('.card-link').href = gist.url
+    })
+  } catch (error) {
+    // Hide the target element in which the gists would have been placed
+    targetElement.setAttribute('hidden', 'hidden')
+
+    // Populate the error alert and show it
+    const alertElement = document.querySelector('#gists-errors')
+    alertElement.textContent = error.message
+    alertElement.removeAttribute('hidden')
+  }
 }
 
 /**
@@ -152,21 +192,16 @@ async function loadGists (githubUsername, githubToken, limit) {
  * This selects the given template, clones it the specified number of times,
  * adds an animation delay for the loading animation, and finally adds all the
  * cloned card elements to the document.
- * @param {string} templateSelector A CSS selector string to select the
- * `template` element that needs to be cloned.
- * @param {string} targetSelector A CSS selector specifying where the cloned
- * cards need to be added to.
+ * @param {HTMLTemplateElement} templateElement A CSS selector string to select
+ * the `template` element that needs to be cloned.
+ * @param {HTMLElement} targetElement A CSS selector specifying where the
+ * cloned cards need to be added to.
  * @param {number} numberOfClones The number times the specified card template
  * needs to be cloned
  * @returns {HTMLElement[]} An array of card elements that have been added to
  * the document.
  */
-function initCards (templateSelector, targetSelector, numberOfClones) {
-  /**
-   * The HTML template that will be used to display all the Repos
-   * @type {HTMLTemplateElement}
-   */
-  const templateElement = document.querySelector(templateSelector)
+function initCards (templateElement, targetElement, numberOfClones) {
   /**
    * The fragment to which all the cloned elements will be added to
    * @type {DocumentFragment}
@@ -201,7 +236,7 @@ function initCards (templateSelector, targetSelector, numberOfClones) {
   }
 
   // Add the Gists to the document by appending the fragment
-  document.querySelector(targetSelector).appendChild(fragment)
+  targetElement.appendChild(fragment)
 
   return cardElements
 }
@@ -300,7 +335,7 @@ async function getGists (githubUsername, githubToken, limit) {
   }`
 
   const result = await callGithubApi(githubToken, query,
-    'Could not retrieve pinned repos')
+    'Could not retrieve gists')
 
   // noinspection JSUnresolvedVariable
   return result.data.user.gists.edges.map(edge => edge.node)
