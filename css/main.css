@@ -1,0 +1,42 @@
+/* Hide elements if no JavaScript is enabled */
+.no-js .no-js-d-none {
+  display: none;
+}
+
+.card--async {
+  transition: background-color 1s;
+}
+
+.card--async > .card-img-top,
+.card--async > .card-body {
+  transition: opacity 1s;
+}
+
+.card-img-top__code {
+  /* Unfortunately I need to use !important here because of Prism's own
+  stylesheet */
+  overflow: hidden !important;
+  height: 200px;
+}
+
+.card--loading {
+  animation-name: card-loading;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.card--loading > .card-img-top,
+.card--loading > .card-body {
+  visibility: hidden;
+  opacity: 0;
+}
+
+@keyframes card-loading {
+  from {
+    background-color: var(--dark);
+  }
+  to {
+    background-color: var(--light);
+  }
+}
