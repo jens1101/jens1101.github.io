@@ -1,3 +1,5 @@
+/* global Prism fetch */
+
 /**
  * @typedef {Object} Repository
  * @property {string} name The name of the repository
@@ -355,7 +357,7 @@ async function callGithubApi (token, query, errorMessage) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `bearer ${token}`
+      Authorization: `bearer ${token}`
     },
     body: JSON.stringify({ query })
   })
@@ -364,5 +366,5 @@ async function callGithubApi (token, query, errorMessage) {
     throw new Error(errorMessage || 'Error while fetching data from server')
   }
 
-  return await result.json()
+  return result.json()
 }
