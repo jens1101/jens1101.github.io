@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Parallax Demo</title>
+  <link href="vendor/bootstrap-4.3.1/css/bootstrap.min.css"
+        rel="stylesheet">
+  <style>
+    .parallax {
+      overflow: auto;
+      height: 100vh;
+      perspective: 1px;
+      perspective-origin: top left;
+    }
+
+    .parallax__layer {
+      position: relative;
+      z-index: calc(var(--parallax-depth) * -1);
+      padding: 2em 0;
+      transform: translateZ(calc(var(--parallax-depth) * -1px)) scale(calc(var(--parallax-depth) + 1));
+      transform-origin: top left;
+      color: white;
+      background: lightsteelblue;
+      --parallax-depth: 0;
+    }
+
+    .parallax__layer--1 {
+      border: 1px solid red;
+      background: url("https://www.toptal.com/designers/subtlepatterns/patterns/stardust.png");
+      --parallax-depth: 1;
+    }
+  </style>
+</head>
+<body>
+  <main class="parallax">
+    <section class="parallax__layer parallax__layer--1">
+      Group 1 Background
+    </section>
+    <section class="parallax__layer">
+      Group 1 Foreground
+    </section>
+
+    <!-- FIXME: this second background layer is causing whitespace at the bottom -->
+    <section class="parallax__layer parallax__layer--1">
+      Group 2 Background
+    </section>
+    <section class="parallax__layer">
+      Group 2 Foreground
+    </section>
+  </main>
+</body>
+</html>
