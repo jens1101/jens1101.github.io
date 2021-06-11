@@ -27,11 +27,13 @@
  */
 
 (async function main () {
+  // TODO: this no longer works. Find an alternative way to obtain this info
+  //  without using a token.
   /**
    * A simple public read-only token to use with GitHub's GraphQL API
    * @type {string}
    */
-  const githubToken = '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'
+  const githubToken = ''
   /**
    * My GitHub user name. This is used to only get my own pinned repos and
    * gists.
