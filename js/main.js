@@ -31,7 +31,7 @@
    * A simple public read-only token to use with GitHub's GraphQL API
    * @type {string}
    */
-  const githubToken = 'cdbf893cfdb6b48b97b0c498195b5f9ca9593329'
+  const githubToken = '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'
   /**
    * My GitHub user name. This is used to only get my own pinned repos and
    * gists.
