@@ -4,7 +4,8 @@
   "description": "Jens Tschirpig personal website",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "serve"
+    "start": "serve",
+    "format": "prettier -w './{css/**/*,js/**/*,*.(html|webmanifest|md),package.json}'"
   },
   "repository": {
     "type": "git",

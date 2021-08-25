@@ -3,6 +3,11 @@
     <option name="AUTODETECT_INDENTS" value="false" />
     <option name="LINE_SEPARATOR" value="&#10;" />
     <option name="RIGHT_MARGIN" value="80" />
+    <option name="DO_NOT_FORMAT">
+      <list>
+        <fileSet type="globPattern" pattern="vendor/**/*" />
+      </list>
+    </option>
     <HTMLCodeStyleSettings>
       <option name="HTML_ATTRIBUTE_WRAP" value="4" />
       <option name="HTML_SPACE_INSIDE_EMPTY_TAG" value="true" />
