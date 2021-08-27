@@ -4,7 +4,8 @@
   "description": "Jens Tschirpig personal website",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "serve"
+    "start": "serve",
+    "format": "prettier -w './{css/**/*,js/**/*,*.(html|webmanifest|md),package.json}'"
   },
   "repository": {
     "type": "git",
@@ -16,7 +17,7 @@
   },
   "homepage": "https://jens1101.github.io",
   "devDependencies": {
-    "serve": "^11.3.2",
-    "standard": "^14.3.1"
+    "prettier": "^2.3.2",
+    "serve": "^12.0.0"
   }
 }

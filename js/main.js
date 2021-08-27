@@ -16,70 +16,65 @@
 
 /**
  * @typedef {Object} GistFile
- * @property {string} name
- * @property {Language} language
- * @property {string} text
+ * @property {string} filename "bootstrap-select-app.js"
+ * @property {string} language "JavaScript"
+ * @property {string} raw_url
+ *   "https://gist.githubusercontent.com/jens1101/fcdd3d2434fdcb27be554ecc71bf7f33/raw/6090adc9f3efc7638668e02cbe3c40379ef691e1/bootstrap-select-app.js"
+ * @property {number} size 1877
+ * @property {string} type "application/javascript"
  */
 
-/**
- * @typedef {Object} Language
- * @property {string} name
- */
+(async function main() {
+  /**
+   * My GitHub user name. This is used to get information about my repos and
+   * Gists.
+   * @type {string}
+   */
+  const username = "jens1101";
 
-(async function main () {
-  // TODO: this no longer works. Find an alternative way to obtain this info
-  //  without using a token.
   /**
-   * A simple public read-only token to use with GitHub's GraphQL API
-   * @type {string}
-   */
-  const githubToken = ''
-  /**
-   * My GitHub user name. This is used to only get my own pinned repos and
-   * gists.
-   * @type {string}
-   */
-  const githubUsername = 'jens1101'
-  /**
-   * The number of gists and pinned repos to load in the home page.
+   * The number of gists to load on the home page.
    * @type {number}
    */
-  const limit = 6
+  const gistLimit = 6;
 
-  // Remove the 'no-js' class from the document
-  document.documentElement.classList.remove('no-js')
+  const repoNames = ["SteamCMD-JS-Interface", "mini-pomodoro"];
 
   // Load all the gists and pinned repos
   await Promise.all([
-    loadPinnedRepos(githubUsername, githubToken, limit),
-    loadGists(githubUsername, githubToken, limit)
-  ])
-})()
+    loadRepos(username, repoNames),
+    loadGists(username, gistLimit),
+  ]);
+})();
 
 /**
- * Loads all the public pinned repos for the given GitHub user into the home
- * page
- * @param {string} githubUsername The username to query
- * @param {string} githubToken The token to use for the query
- * @param {number} limit The number of pinned repos to get
+ * Loads a list of public repos for the given GitHub user into the home page
+ * @param {string} username The Github username to query
+ * @param {string[]} repoNames Array of repo names to fetch
  * @returns {Promise<void>}
  */
-async function loadPinnedRepos (githubUsername, githubToken, limit) {
+async function loadRepos(username, repoNames) {
   /**
-   * The HTML template that will be used to display all the Repos
+   * The HTML template that will be used for each repo
    * @type {HTMLTemplateElement}
    */
-  const templateElement = document.querySelector('#repo-card-template')
+  const templateElement = document.querySelector("#repo-card-template");
+
   /**
-   * The element into which all the gists will loaded
+   * The element into which all the repos will loaded
    * @type {HTMLElement}
    */
-  const targetElement = document.querySelector('#my-pinned-repos')
+  const targetElement = document.querySelector("#my-pinned-repos");
+
   /**
    * All the card elements that will be populated
    * @type {HTMLElement[]}
    */
-  const repoCardElements = initCards(templateElement, targetElement, limit)
+  const repoCardElements = initCards(
+    templateElement,
+    targetElement,
+    repoNames.length
+  );
 
   try {
     /**
@@ -87,106 +82,116 @@ async function loadPinnedRepos (githubUsername, githubToken, limit) {
      * elements
      * @type {Repository[]}
      */
-    const repos = await getPinnedRepos(githubUsername, githubToken, limit)
+    const repos = (await getUserPublicRepos(username)).filter((repo) =>
+      repoNames.includes(repo.name)
+    );
 
     fillElements(repoCardElements, repos, (repoCardElement, repo) => {
       // Add the repository name and link
       /** @type {HTMLAnchorElement} */
-      const titleLink = repoCardElement.querySelector('.card-title__link')
-      titleLink.textContent = repo.name
-      titleLink.href = repo.url.toString()
+      const titleLink = repoCardElement.querySelector(".card-title__link");
+      titleLink.textContent = repo.name;
+      titleLink.href = repo.url.toString();
 
       // Add the repository description
-      repoCardElement.querySelector('.card-text__description')
-        .textContent = repo.description
+      repoCardElement.querySelector(".card-text__description").textContent =
+        repo.description;
 
       // Add the repository's language shield
       const languageShield = repoCardElement.querySelector(
-        '.card-text__language')
-      languageShield.addEventListener('load', () => {
-        // Remove the "loading" class only once the image has been loaded
-        repoCardElement.classList.remove('card--loading')
-      }, { once: true, passive: true })
-      languageShield.src = `https://img.shields.io/github/languages/top/${githubUsername}/${repo.name}`
-    })
+        ".card-text__language"
+      );
+      languageShield.addEventListener(
+        "load",
+        () => {
+          // Remove the "loading" class only once the image has been loaded
+          repoCardElement.classList.remove("card--loading");
+        },
+        { once: true, passive: true }
+      );
+      languageShield.src = `https://img.shields.io/github/languages/top/${username}/${repo.name}`;
+    });
   } catch (error) {
     // Hide the target element in which the gists would have been placed
-    targetElement.setAttribute('hidden', 'hidden')
+    targetElement.setAttribute("hidden", "hidden");
 
     // Populate the error alert and show it
-    const alertElement = document.querySelector('#pinned-repos-errors')
-    alertElement.textContent = error.message
-    alertElement.removeAttribute('hidden')
+    const alertElement = document.querySelector("#pinned-repos-errors");
+    alertElement.textContent = error.message;
+    alertElement.removeAttribute("hidden");
   }
 }
 
 /**
  * Loads all the public gists for the given GitHub user into the home page
- * @param {string} githubUsername The username to query
- * @param {string} githubToken The token to use for the query
+ * @param {string} username The username to query
  * @param {number} limit The number of gists to get
  * @returns {Promise<void>}
  */
-async function loadGists (githubUsername, githubToken, limit) {
+async function loadGists(username, limit) {
   /**
-   * The HTML template that will be used to display all the Repos
+   * The HTML template that will be used for each gist
    * @type {HTMLTemplateElement}
    */
-  const templateElement = document.querySelector('#gist-card-template')
+  const templateElement = document.querySelector("#gist-card-template");
+
   /**
    * The element into which all the gists will loaded
    * @type {HTMLElement}
    */
-  const targetElement = document.querySelector('#my-gists')
+  const targetElement = document.querySelector("#my-gists");
+
   /**
    * All the card elements that will be populated
    * @type {HTMLElement[]}
    */
-  const gistCardElements = initCards(templateElement, targetElement, limit)
+  const gistCardElements = initCards(templateElement, targetElement, limit);
 
   try {
     /**
      * All of the gists that need to be loaded into the card elements
      * @type {Gist[]}
      */
-    const gists = await getGists(githubUsername, githubToken, limit)
+    const gists = await getUserPublicGists(username, { perPage: limit });
 
     fillElements(gistCardElements, gists, (gistCardElement, gist) => {
       // Remove all children of the code element. This is to prevent unexpected
       // whitespace in the code preview.
-      const codeElement = gistCardElement.querySelector('.card-img-top code')
-      while (codeElement.firstChild) {
-        codeElement.firstChild.remove()
+      const preElement = gistCardElement.querySelector(".card-img-top__code");
+      while (preElement.firstChild) {
+        preElement.firstChild.remove();
       }
 
       // Add the code text and highlight it.
-      codeElement.appendChild(document.createTextNode(gist.files[0].text))
-      codeElement.classList.add(
-        `language-${gist.files[0].language.name.toLowerCase()}`)
-      Prism.highlightElement(codeElement)
+      preElement.setAttribute("data-src", gist.files[0].raw_url);
+      preElement.classList.add(
+        `language-${gist.files[0].language.toLowerCase()}`
+      );
 
       // Remove the "loading" class
-      gistCardElement.classList.remove('card--loading')
+      gistCardElement.classList.remove("card--loading");
 
       // Name of the main file that acts as the Gist title
-      gistCardElement.querySelector('.card-title')
-        .textContent = gist.files[0].name
+      gistCardElement.querySelector(".card-title").textContent =
+        gist.files[0].name;
 
       // Gist description
-      gistCardElement.querySelector('.card-text')
-        .textContent = gist.description
+      gistCardElement.querySelector(".card-text").textContent =
+        gist.description;
 
       // Gist link
-      gistCardElement.querySelector('.card-link').href = gist.url
-    })
+      gistCardElement.querySelector(".card-link").href = gist.url;
+    });
+
+    Prism.highlightAll();
   } catch (error) {
     // Hide the target element in which the gists would have been placed
-    targetElement.setAttribute('hidden', 'hidden')
+    targetElement.setAttribute("hidden", "hidden");
 
     // Populate the error alert and show it
-    const alertElement = document.querySelector('#gists-errors')
-    alertElement.textContent = error.message
-    alertElement.removeAttribute('hidden')
+    const alertElement = document.querySelector("#gists-errors");
+    alertElement.textContent = error.message;
+    alertElement.removeAttribute("hidden");
   }
 }
 
@@ -205,44 +210,43 @@ async function loadGists (githubUsername, githubToken, limit) {
  * @returns {HTMLElement[]} An array of card elements that have been added to
  * the document.
  */
-function initCards (templateElement, targetElement, numberOfClones) {
+function initCards(templateElement, targetElement, numberOfClones) {
   /**
    * The fragment to which all the cloned elements will be added to
    * @type {DocumentFragment}
    */
-  const fragment = document.createDocumentFragment()
+  const fragment = document.createDocumentFragment();
   /**
    * All of the elements with the class `card--async` that have been added to
    * the document fragment.
    * @type {HTMLElement[]}
    */
-  const cardElements = []
+  const cardElements = [];
 
   // Clone the template the specified number of times and add it to the
   // fragment
   for (let i = 0; i < numberOfClones; i++) {
-    const cardElement = document.importNode(templateElement.content, true)
-    fragment.appendChild(cardElement)
+    const cardElement = document.importNode(templateElement.content, true);
+    fragment.appendChild(cardElement);
   }
 
   // For each element that has been added to the fragment: select the card
   // element, add an animation delay, and add it to the `cardElements` array.
   for (const [index, element] of Array.from(fragment.children).entries()) {
     /** @type {HTMLElement} */
-    const card = element.querySelector('.card--async')
+    const card = element.querySelector(".card--async");
 
     // Add animation delay. This creates a nice cascading effect while the
     // cards are loading
-    card.style.animationDelay = `-${2 -
-    ((index * 0.2) % 2)}s`
+    card.style.animationDelay = `-${2 - ((index * 0.2) % 2)}s`;
 
-    cardElements.push(card)
+    cardElements.push(card);
   }
 
   // Add the Gists to the document by appending the fragment
-  targetElement.appendChild(fragment)
+  targetElement.appendChild(fragment);
 
-  return cardElements
+  return cardElements;
 }
 
 /**
@@ -261,112 +265,140 @@ function initCards (templateElement, targetElement, numberOfClones) {
  * @param {function(HTMLElement, T)} callback Triggers during each iteration.
  * The current element and data is passed as arguments.
  */
-function fillElements (elements, dataArray, callback) {
+function fillElements(elements, dataArray, callback) {
   for (const data of dataArray) {
     // Remove and get the element that's at the beginning of the array
-    const element = elements.shift()
+    const element = elements.shift();
 
     // Stop the loop if no more elements are left
-    if (!element) break
+    if (!element) break;
 
-    callback(element, data)
+    callback(element, data);
   }
 
   // Remove any unused Gist elements.
   for (const element of elements) {
-    element.remove()
+    element.remove();
   }
 }
 
 /**
- * Gets all the public pinned repos from GitHub for the specified user.
- * @param {string} githubUsername The username to query
- * @param {string} githubToken The token to use for the query
- * @param {number} limit The number of pinned repos to get
+ * Gets the public repos of the specified Github user.
+ * @see https://docs.github.com/en/rest/reference/repos#list-repositories-for-a-user
+ * @param {string} username
+ * @param {Object} [parameters]
+ * @param {('all'|'owner'|'member')} [parameters.type]
+ * @param {('created'|'updated'|'pushed'|'full_name')} [parameters.sort]
+ * @param {('asc'|'desc')} [parameters.direction]
+ * @param {number} [parameters.perPage] Results per page (max 100)
+ * @param {number} [parameters.page] Page number of the results to fetch.
  * @returns {Promise<Repository[]>}
  */
-async function getPinnedRepos (githubUsername, githubToken, limit) {
-  const query = `query {
-    user(login: "jens1101") {
-      pinnedItems(first: 5, types: [REPOSITORY]) {
-        edges {
-          node {
-            ... on Repository {
-              name
-              description
-              url
-            }
-          }
-        }
-      }
-    }
-  }`
-  const result = await callGithubApi(githubToken, query,
-    'Could not retrieve pinned repos')
+async function getUserPublicRepos(
+  username,
+  { type, sort, direction, perPage, page } = {}
+) {
+  const searchParams = objectToSearchParams({
+    type,
+    sort,
+    direction,
+    per_page: perPage,
+    page,
+  });
 
-  // noinspection JSUnresolvedVariable
-  return result.data.user.pinnedItems.edges.map(edge => edge.node)
+  const result = await githubApiFetch(`users/${username}/repos`, {
+    searchParams: searchParams,
+    errorMessage: "Could not retrieve repositories",
+  });
+
+  return result.map((repo) => ({
+    name: repo.name,
+    description: repo.description,
+    url: repo.url,
+  }));
 }
 
 /**
- * Fetches all the public GitHub Gists of the specified user
- * @param {string} githubUsername
- * @param {string} githubToken
- * @param {number} limit
- * @returns {Promise<Gist[]>} Resolves in an array of `Gist` objects
+ * Gets the public repos of the specified Github user.
+ * @see https://docs.github.com/en/rest/reference/gists#list-gists-for-a-user
+ * @param {string} username
+ * @param {Object} [parameters]
+ * @param {string} [parameters.since] Only show gists updated after the given
+ *   time. This is a timestamp in ISO 8601 format.
+ * @param {number} [parameters.perPage] Results per page (max 100)
+ * @param {number} [parameters.page] Page number of the results to fetch.
+ * @returns {Promise<Gist[]>}
  */
-async function getGists (githubUsername, githubToken, limit) {
-  const query = `query {
-    user(login: "${githubUsername}") {
-      gists(first: ${limit}, orderBy: {field: CREATED_AT, direction: DESC}) {
-        edges {
-          node {
-            ... on Gist {
-              description
-              url
-              files(limit: 1) {
-                name
-                language {
-                  name
-                }
-                text(truncate: 600)
-              }
-            }
-          }
-        }
-      }
-    }
-  }`
+async function getUserPublicGists(username, { since, perPage, page } = {}) {
+  const searchParams = objectToSearchParams({
+    since,
+    per_page: perPage,
+    page,
+  });
 
-  const result = await callGithubApi(githubToken, query,
-    'Could not retrieve gists')
+  const gists = await githubApiFetch(`users/${username}/gists`, {
+    searchParams,
+    errorMessage: "Could not retrieve gists",
+  });
 
-  // noinspection JSUnresolvedVariable
-  return result.data.user.gists.edges.map(edge => edge.node)
+  return gists.map((gist) => ({
+    description: gist.description,
+    url: gist.url,
+    files: Object.values(gist.files),
+  }));
 }
 
 /**
- * Calls the GitHub GraphQL API
- * @param {string} token The token to use to access the API
- * @param {string} query The GraphQL query to run
- * @param {string} [errorMessage] The error message to return if an error
- * occurs. If omitted then a generic error message will be returned instead
- * @returns {Promise<Object>} The decoded response from the server
- * @throws Error when the API couldn't be queried
+ * Converts the specified object to search params. Any values that are either
+ * null or undefined will be skipped.
+ * @param {Object} object
+ * @return {URLSearchParams}
  */
-async function callGithubApi (token, query, errorMessage) {
-  const result = await fetch('https://api.github.com/graphql', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `bearer ${token}`
-    },
-    body: JSON.stringify({ query })
-  })
+function objectToSearchParams(object) {
+  const searchParams = new URLSearchParams();
 
-  if (!result.ok) {
-    throw new Error(errorMessage || 'Error while fetching data from server')
+  for (const [key, value] of Object.entries(object)) {
+    if (value == null) {
+      continue;
+    }
+
+    searchParams.append(key, String(value));
   }
 
-  return result.json()
+  return searchParams;
+}
+
+/**
+ * Makes a call to the GitHub API
+ * @param {string} path The endpoint that you want to call.
+ * @param {Object} [options]
+ * @param {URLSearchParams} [options.searchParams] Any search parameters that
+ * you want to append to the request.
+ * @param {string} [options.errorMessage] The error message to return if an
+ * error occurs. If omitted then a generic error message will be returned
+ * instead.
+ * @returns {Promise<Object>} The JSON decoded response from the server
+ * @throws {Error} when the API couldn't be queried
+ */
+async function githubApiFetch(path, { searchParams, errorMessage } = {}) {
+  const url = new URL(path, "https://api.github.com/");
+
+  if (searchParams instanceof URLSearchParams) {
+    for ([name, value] of searchParams.entries()) {
+      url.searchParams.append(name, value);
+    }
+  }
+
+  const result = await fetch(url.toString(), {
+    method: "GET",
+    headers: {
+      Accept: "application/vnd.github.v3+json",
+    },
+  });
+
+  if (!result.ok) {
+    throw new Error(errorMessage || "Error while fetching data from server");
+  }
+
+  return result.json();
 }

@@ -1,183 +1,191 @@
-<!doctype html>
+<!DOCTYPE html>
 <html class="no-js" lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Jens Tschirpig | Home</title>
-  <meta content="width=device-width, initial-scale=1, shrink-to-fit=no"
-        name="viewport">
+  <head>
+    <meta charset="utf-8" />
+    <title>Jens Tschirpig | Home</title>
+    <meta
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+      name="viewport"
+    />
 
-  <base href="/" target="_blank">
+    <base href="/" target="_blank" />
 
-  <link href="site.webmanifest" rel="manifest">
-  <link href="icon.png" rel="apple-touch-icon">
+    <link href="site.webmanifest" rel="manifest" />
+    <link href="icon.png" rel="apple-touch-icon" />
 
-  <link href="vendor/bootstrap-4.3.1/css/bootstrap.min.css"
-        rel="stylesheet">
-  <link href="vendor/prism-1.17.1/prism.css" rel="stylesheet">
-  <link href="css/main.css" rel="stylesheet">
+    <link
+      href="vendor/bootstrap-4.3.1/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="vendor/prism-1.24.1/prism.css" rel="stylesheet" />
+    <link href="css/main.css" rel="stylesheet" />
 
-  <script>
-    // Replace the `no-js` class with the `js` class
-    (function (htmlElement) {
-      htmlElement.classList.remove('no-js')
-      htmlElement.classList.add('js')
-    })(document.documentElement)
-  </script>
-  <script data-manual defer src="vendor/prism-1.17.1/prism.js"></script>
-  <script defer src="js/main.js"></script>
-</head>
+    <script>
+      // Replace the `no-js` class with the `js` class
+      (function (htmlElement) {
+        htmlElement.classList.remove("no-js");
+        htmlElement.classList.add("js");
+      })(document.documentElement);
+    </script>
+    <script data-manual defer src="vendor/prism-1.24.1/prism.js"></script>
+    <script defer src="js/main.js"></script>
+  </head>
 
-<body>
-  <header>
-    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
-      <div class="container">
-        <a class="navbar-brand" href="/" target="_self">
-          Jens Tschirpig
-        </a>
-      </div>
-    </nav>
-  </header>
+  <body>
+    <header>
+      <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+        <div class="container">
+          <a class="navbar-brand" href="/" target="_self"> Jens Tschirpig </a>
+        </div>
+      </nav>
+    </header>
 
-  <main class="container">
-    <section class="row justify-content-center my-5 text-center">
-      <div class="col-auto">
-        <img alt="Portrait of Jens"
-             class="rounded-circle img-fluid mb-4 img-thumbnail"
-             src="img/jens_profile@1x.jpg"
-             srcset="img/jens_profile@1x.jpg 1x, img/jens_profile@2x.jpg 2x, img/jens_profile@3x.jpg 3x">
-      </div>
-      <div class="w-100"></div>
-      <div class="col-sm-10 col-md-8 col-lg-10">
-        <h1 class="text-uppercase">Hi, I'm Jens</h1>
+    <main class="container">
+      <section class="row justify-content-center my-5 text-center">
+        <div class="col-auto">
+          <img
+            alt="Portrait of Jens"
+            class="rounded-circle img-fluid mb-4 img-thumbnail"
+            src="img/jens_profile@1x.jpg"
+            srcset="
+              img/jens_profile@1x.jpg 1x,
+              img/jens_profile@2x.jpg 2x,
+              img/jens_profile@3x.jpg 3x
+            "
+          />
+        </div>
+        <div class="w-100"></div>
+        <div class="col-sm-10 col-md-8 col-lg-10">
+          <h1 class="text-uppercase">Hi, I'm Jens</h1>
+          <p>
+            I'm a web developer by day and a autodidact by night. I have a
+            passion for good code and simple design. I take my time doing things
+            right the first time around and I cannot leave something half-done.
+          </p>
+        </div>
+      </section>
+
+      <hr />
+
+      <section class="mb-5 py-3">
+        <h2 class="text-center">My Projects</h2>
+
         <p>
-          I'm a web developer by day and a autodidact by night. I have a
-          passion for good code and simple design. I take my time doing things
-          right the first time around and I cannot leave something half-done.
-        </p>
-      </div>
-    </section>
-
-    <hr>
-
-    <section class="mb-5 py-3">
-      <h2 class="text-center">My Projects</h2>
-
-      <p>
-        These are projects that I work on during my spare time. They are mostly
-        created to fulfil a personal need or because I want to learn more about
-        a particular technology.
-      </p>
-
-      <div class="no-js-d-none">
-        <p class="mb-4">
-          My featured projects are shown below:
+          These are projects that I work on during my spare time. They are
+          mostly created to fulfil a personal need or because I want to learn
+          more about a particular technology.
         </p>
 
-        <div class="alert alert-danger"
-             hidden
-             id="pinned-repos-errors"
-             role="alert">
-          <!-- Add any repo-related errors here -->
+        <div class="no-js-d-none">
+          <p class="mb-4">My featured projects are shown below:</p>
+
+          <div
+            class="alert alert-danger"
+            hidden
+            id="pinned-repos-errors"
+            role="alert"
+          >
+            <!-- Add any repo-related errors here -->
+          </div>
+
+          <div class="row text-left" id="my-pinned-repos">
+            <!-- Gist cards go here -->
+          </div>
         </div>
 
-        <div class="row text-left" id="my-pinned-repos">
-          <!-- Gist cards go here -->
-        </div>
-      </div>
-
-      <!-- Template used for each pinned repository -->
-      <template id="repo-card-template">
-        <div class="col-lg-6 mb-4">
-          <div class="card h-100 card--async card--loading">
-            <div class="card-body">
-              <h3 class="card-title">
-                <a class="card-title__link" href="#">
-                  <!-- Repo name and link -->
-                </a>
-              </h3>
-              <div class="card-text">
-                <p class="card-text__description">
-                  <!-- Repo description -->
-                </p>
-                <!-- Repo language -->
-                <img alt="Repository language"
-                     class="card-text__language"
-                     src="">
+        <!-- Template used for each pinned repository -->
+        <template id="repo-card-template">
+          <div class="col-lg-6 mb-4">
+            <div class="card h-100 card--async card--loading">
+              <div class="card-body">
+                <h3 class="card-title">
+                  <a class="card-title__link" href="#">
+                    <!-- Repo name and link -->
+                  </a>
+                </h3>
+                <div class="card-text">
+                  <p class="card-text__description">
+                    <!-- Repo description -->
+                  </p>
+                  <!-- Repo language -->
+                  <img
+                    alt="Repository language"
+                    class="card-text__language"
+                    src=""
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </template>
+        </template>
 
-      <p class="text-center">
-        &#x2E3B; View all my projects on
-        <a href="https://github.com/jens1101?tab=repositories">GitHub</a>
-        &#x2E3B;
-      </p>
-    </section>
+        <p class="text-center">
+          &#x2E3B; View all my projects on
+          <a href="https://github.com/jens1101?tab=repositories">GitHub</a>
+          &#x2E3B;
+        </p>
+      </section>
 
-    <section class="mb-5 py-3">
-      <h2 class="text-center">My Gists</h2>
+      <section class="mb-5 py-3">
+        <h2 class="text-center">My Gists</h2>
 
-      <p>
-        These are small code snippets I create whenever I finally figured out a
-        solution to a problem, I learned something new, or I find myself
-        repeatedly writing the same script.
-      </p>
-
-      <div class="no-js-d-none">
-        <p class="mb-4">
-          My most recent gists are shown below:
+        <p>
+          These are small code snippets I create whenever I finally figured out
+          a solution to a problem, I learned something new, or I find myself
+          repeatedly writing the same script.
         </p>
 
-        <div class="alert alert-danger" hidden id="gists-errors" role="alert">
-          <!-- Add any gist-related errors here -->
-        </div>
+        <div class="no-js-d-none">
+          <p class="mb-4">My most recent gists are shown below:</p>
 
-        <div class="row text-left" id="my-gists">
-          <!-- Gist cards go here -->
-        </div>
-      </div>
+          <div class="alert alert-danger" hidden id="gists-errors" role="alert">
+            <!-- Add any gist-related errors here -->
+          </div>
 
-      <!-- Template used for each Gist -->
-      <template id="gist-card-template">
-        <div class="col-lg-6 mb-4">
-          <div class="card h-100 card--async card--loading">
-            <div class="card-img-top">
-              <pre class="m-0 card-img-top__code"><code>
-                  <!-- Gist preview -->
-              </code></pre>
-            </div>
-            <div class="card-body">
-              <h3 class="card-title">
-                <!--  Gist name -->
-              </h3>
-              <p class="card-text">
-                <!-- Gist description -->
-              </p>
-              <a class="btn btn-primary card-link" href="#">
-                View on GitHub
-              </a>
-            </div>
+          <div class="row text-left" id="my-gists">
+            <!-- Gist cards go here -->
           </div>
         </div>
-      </template>
 
-      <p class="text-center">
-        &#x2E3B; View all my gists on
-        <a href="https://gist.github.com/jens1101">GitHub Gist</a> &#x2E3B;
-      </p>
-    </section>
-  </main>
+        <!-- Template used for each Gist -->
+        <template id="gist-card-template">
+          <div class="col-lg-6 mb-4">
+            <div class="card h-100 card--async card--loading">
+              <div class="card-img-top">
+                <pre class="m-0 card-img-top__code">
+                  <!-- Gist preview -->
+                </pre>
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">
+                  <!--  Gist name -->
+                </h3>
+                <p class="card-text">
+                  <!-- Gist description -->
+                </p>
+                <a class="btn btn-primary card-link" href="#">
+                  View on GitHub
+                </a>
+              </div>
+            </div>
+          </div>
+        </template>
 
-  <footer class="bg-light py-3">
-    <div class="container">
-      <div class="row">
-        <small class="col">
-          All rights reserved &copy; 2019 Jens Tschirpig
-        </small>
+        <p class="text-center">
+          &#x2E3B; View all my gists on
+          <a href="https://gist.github.com/jens1101">GitHub Gist</a> &#x2E3B;
+        </p>
+      </section>
+    </main>
+
+    <footer class="bg-light py-3">
+      <div class="container">
+        <div class="row">
+          <small class="col">
+            All rights reserved &copy; 2021 Jens Tschirpig
+          </small>
+        </div>
       </div>
-    </div>
-  </footer>
-</body>
+    </footer>
+  </body>
 </html>
